@@ -58,6 +58,14 @@ def get_recommendations(score):
     else:
         return "🚨 High risk detected! Consult a healthcare provider and adopt healthier habits."
 
+def get_personalized_plan(score):
+    if score < 40:
+        return "🥗 Healthy Diet: Continue balanced meals with fruits, veggies, and lean proteins.\n🏋️‍♀️ Exercise: Maintain your routine with 30 min daily workouts."
+    elif score < 70:
+        return "🥗 Diet Tip: Reduce processed foods and add more fiber-rich meals.\n🏋️‍♀️ Exercise: Try strength training and yoga for better hormone balance."
+    else:
+        return "🚨 High Risk Alert: \n🥗 Focus on low-glycemic foods, whole grains, and healthy fats.\n🏋️‍♀️ Regular Exercise: Daily 30-45 min workouts with cardio and strength training recommended."
+
 def get_motivational_message():
     messages = [
         "🌟 Every step towards a healthier you is a victory!",
@@ -73,6 +81,7 @@ def main():
     st.plotly_chart(risk_meter(score))
     
     st.markdown(f"### 💡 {get_recommendations(score)}")
+    st.markdown(f"### 📅 Personalized Diet & Exercise Plan:\n{get_personalized_plan(score)}")
     st.success(get_motivational_message())
     
     if score < 40:
