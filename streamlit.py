@@ -1,131 +1,76 @@
-import numpy as np
-import pandas as pd
 import streamlit as st
-import time
 import random
-import matplotlib.pyplot as plt
-import seaborn as sns
+import time
 import plotly.graph_objects as go
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
 
-# Streamlit App Title
-st.set_page_config(page_title="PCOS Prediction Game", layout="wide")
-st.title("🎮 PCOS Prediction Game")
-st.markdown("Engage in an interactive way to assess your risk level for PCOS!")
-
-# ================== Data Preprocessing ==================
-@st.cache_data
-def load_and_preprocess_data():
-    file_path = "PCOS_data.csv"
-    df = pd.read_csv(file_path)
-    
-    df_cleaned = df.drop(columns=["Sl. No", "Patient File No.", "Unnamed: 44"], errors="ignore")
-    
-    for col in df_cleaned.columns:
-        if df_cleaned[col].dtype == "object":
-            df_cleaned[col].fillna(df_cleaned[col].mode()[0], inplace=True)
-        else:
-            df_cleaned[col].fillna(df_cleaned[col].median(), inplace=True)
-    
-    df_cleaned = df_cleaned.apply(pd.to_numeric, errors="coerce")
-
-    if "PCOS (Y/N)" not in df_cleaned.columns:
-        st.error("Error: Target column 'PCOS (Y/N)' not found in dataset.")
-        st.stop()
-    
-    X = df_cleaned.drop(columns=["PCOS (Y/N)"])
-    y = df_cleaned["PCOS (Y/N)"]
-    
-    return X, y
-
-@st.cache_resource
-def train_model(X, y):
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    model = RandomForestClassifier(n_estimators=150, max_depth=10, random_state=42)
-    model.fit(X_train, y_train)
-    accuracy = accuracy_score(y_test, model.predict(X_test))
-    return model, accuracy
-
-# ================== Personality Quiz Approach ==================
-def personality_quiz():
-    st.subheader("📝 Answer These Fun Questions!")
-    risk_score = 0
-    progress_bar = st.progress(0)
-    
-    fatigue = st.radio("How often do you feel fatigued?", ["🔋 Rarely", "😴 Sometimes", "🛌 Often", "🛑 Always"])
-    if fatigue == "🛑 Always": risk_score += 3
-    elif fatigue == "🛌 Often": risk_score += 2
-    elif fatigue == "😴 Sometimes": risk_score += 1
-    progress_bar.progress(25)
-    
-    diet = st.radio("How would you describe your diet?", ["🍏 Healthy", "🍔 Fast food sometimes", "🍕 Mostly unhealthy", "🥤 Poor diet"])
-    if diet == "🥤 Poor diet": risk_score += 3
-    elif diet == "🍕 Mostly unhealthy": risk_score += 2
-    elif diet == "🍔 Fast food sometimes": risk_score += 1
-    progress_bar.progress(50)
-    
-    exercise = st.radio("How often do you exercise?", ["🏃‍♀️ Regularly", "🚶 Occasionally", "🛋️ Rarely", "❌ Never"])
-    if exercise == "❌ Never": risk_score += 3
-    elif exercise == "🛋️ Rarely": risk_score += 2
-    elif exercise == "🚶 Occasionally": risk_score += 1
-    progress_bar.progress(100)
-    
-    return risk_score
-
-# ================== Risk Reveal with Animated Meter ==================
-def risk_meter_animation(risk_score):
-    st.subheader("🎡 Your Risk Level!")
-    risk_percentage = min(risk_score * 10, 100)
-    
-    progress_text = st.empty()
-    progress_bar = st.progress(0)
-    
-    for i in range(0, risk_percentage + 1, 5):
-        progress_text.text(f"Risk Level: {i}%")
-        progress_bar.progress(i)
-        time.sleep(0.05)
-    
+def risk_meter(score):
     fig = go.Figure(go.Indicator(
         mode="gauge+number",
-        value=risk_percentage,
-        title={"text": "PCOS Risk Level"},
-        gauge={"axis": {"range": [0, 100]},
-               "bar": {"color": "red" if risk_percentage > 50 else "green"}}
+        value=score,
+        title={'text': "PCOS Risk Level"},
+        gauge={
+            'axis': {'range': [0, 100]},
+            'bar': {'color': "red" if score > 70 else "orange" if score > 40 else "green"},
+            'steps': [
+                {'range': [0, 40], 'color': "lightgreen"},
+                {'range': [40, 70], 'color': "yellow"},
+                {'range': [70, 100], 'color': "red"}
+            ]
+        }
     ))
-    st.plotly_chart(fig)
-    
-    if risk_percentage < 30:
-        st.balloons()
-    elif risk_percentage > 70:
-        st.warning("🚨 High Risk! Consider consulting a doctor.")
-    
-    return risk_percentage
+    return fig
 
-# ================== Lifestyle Recommendation System ==================
-def lifestyle_recommendations(risk_percentage):
-    st.subheader("💡 Personalized Lifestyle Recommendations")
+def personality_quiz():
+    st.title("🩺 PCOS Lifestyle Risk Assessment")
     
-    if risk_percentage < 30:
-        st.success("✅ Maintain a balanced diet with whole foods and regular physical activity!")
-    elif risk_percentage < 60:
-        st.warning("⚠️ Try increasing your exercise and reducing processed foods!")
+    questions = {
+        "How often do you exercise?": ["Rarely", "1-2 times a week", "3-5 times a week", "Daily"],
+        "How would you rate your diet?": ["Poor", "Average", "Good", "Excellent"],
+        "Do you have irregular menstrual cycles?": ["Never", "Occasionally", "Often", "Always"],
+        "How stressed do you feel daily?": ["Not at all", "Mildly", "Moderately", "Highly stressed"],
+        "How many hours of sleep do you get per night?": ["Less than 5", "5-6 hours", "7-8 hours", "More than 8"]
+    }
+    
+    score = 0
+    for question, options in questions.items():
+        answer = st.radio(question, options, index=1)
+        score += options.index(answer) * 25  # Assign risk scores dynamically
+        st.progress(score // len(questions))
+        time.sleep(0.5)  # Simulate progress
+    
+    return score
+
+def get_recommendations(score):
+    if score < 40:
+        return "Great job! Keep up your healthy habits! 🌟"
+    elif score < 70:
+        return "You're doing well, but there's room for improvement. Consider more balanced meals and exercise! 🏋️‍♀️"
     else:
-        st.error("🚨 Prioritize health checkups and stress management techniques like yoga!")
-    
-    health_quotes = [
-        "🌟 Small changes lead to big results!", 
-        "💪 Stay consistent, and you’ll see improvements!", 
-        "🧘 Mind and body balance is key to health!"
+        return "Your lifestyle suggests a higher risk. Consult a specialist and make small, sustainable changes! ❤️"
+
+def get_motivational_message():
+    messages = [
+        "Your health journey starts with small steps! 🚶‍♀️",
+        "Consistency is key to a healthier you! 🔑",
+        "Healthy habits today mean a better future! 🌱",
+        "Your body loves when you take care of it! ❤️"
     ]
-    st.info(random.choice(health_quotes))
+    return random.choice(messages)
 
-# ================== Main Execution ==================
-X_data, y_data = load_and_preprocess_data()
-pcos_model, model_acc = train_model(X_data, y_data)
-st.sidebar.write(f"✅ **Model Accuracy:** {model_acc * 100:.2f}%")
+def main():
+    score = personality_quiz()
+    st.subheader("📊 Your PCOS Risk Score: " + str(score))
+    st.plotly_chart(risk_meter(score))
+    
+    st.markdown(f"### 💡 {get_recommendations(score)}")
+    st.success(get_motivational_message())
+    
+    if score < 40:
+        st.balloons()
+    elif score < 70:
+        st.snow()
+    else:
+        st.error("⚠️ Consider lifestyle changes and consult a doctor!")
 
-risk_score = personality_quiz()
-risk_percentage = risk_meter_animation(risk_score)
-lifestyle_recommendations(risk_percentage)
+if __name__ == "__main__":
+    main()
