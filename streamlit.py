@@ -10,9 +10,6 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 
-# Set Page Config at the Top
-st.set_page_config(page_title="PCOS Risk Dashboard", layout="wide")
-
 # Load and prepare dataset
 file_path = "PCOS_data.csv"
 try:
@@ -45,60 +42,48 @@ except Exception as e:
     st.error(f"Error loading dataset: {e}")
     st.stop()
 
-# Apply Custom CSS for Better UI
-st.markdown(
-    """
-    <style>
-    .main {background-color: #f5f7fa;}
-    h1 {color: #ff4b4b; text-align: center;}
-    .stButton>button {background-color: #ff4b4b; color: white; font-size: 18px; border-radius: 10px;}
-    .stSidebar {background-color: #f5f7fa;}
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
 # Dashboard Layout
-st.title("✨ PCOS Risk Assessment Dashboard ✨")
+st.set_page_config(layout="wide")
+st.title("PCOS Risk Assessment Dashboard")
 
 with st.sidebar:
-    st.header("🔍 Navigation")
+    st.header("Navigation")
     page = st.radio("Go to", ["PCOS Awareness", "PCOS Prediction", "Lifestyle Quiz"])
     st.write(f"✅ Model Accuracy: {model_accuracy * 100:.2f}%")
 
 # PCOS Awareness Section
 def pcos_awareness():
-    st.header("📖 Understanding PCOS")
-    st.image("pcos_awareness.jpg", use_column_width=True)
+    st.header("🔍 Understanding PCOS")
+    st.subheader("What is PCOS?")
+    st.write("PCOS (Polycystic Ovary Syndrome) is a common hormonal disorder affecting people with ovaries.")
     
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.subheader("⚠️ Symptoms")
+        st.subheader("Symptoms")
         symptoms = ["Irregular periods", "Excess hair growth", "Acne or oily skin", "Weight gain", "Thinning hair"]
         st.write("\n".join([f"- {symptom}" for symptom in symptoms]))
     with col2:
-        st.subheader("🔬 Causes")
+        st.subheader("Causes")
         causes = ["Hormonal imbalances", "Genetic factors", "Insulin resistance", "Inflammation"]
         st.write("\n".join([f"- {cause}" for cause in causes]))
     with col3:
-        st.subheader("💔 Risks")
+        st.subheader("Risks")
         risks = ["Infertility", "Type 2 diabetes", "High blood pressure", "Heart disease", "Depression"]
         st.write("\n".join([f"- {risk}" for risk in risks]))
 
 # PCOS Prediction Section
 def pcos_prediction():
     st.header("🧪 PCOS Prediction")
-    st.write("Enter your details below to predict your PCOS risk level.")
-    
     user_input = []
+    
     col1, col2 = st.columns(2)
     for idx, feature in enumerate(X_filled.columns):
         with col1 if idx % 2 == 0 else col2:
-            value = st.number_input(f"Enter {feature}", min_value=0.0, format="%.2f")
+            value = st.number_input(f"Enter your {feature}", min_value=0.0, format="%.2f")
             user_input.append(value)
     
-    if st.button("🚀 Predict PCOS Risk!"):
-        with st.spinner("Analyzing data...⏳"):
+    if st.button("Predict PCOS Risk!"):
+        with st.spinner("Analyzing data..."):
             time.sleep(2)
             user_input = np.array(user_input).reshape(1, -1)
             prediction = model.predict(user_input)
