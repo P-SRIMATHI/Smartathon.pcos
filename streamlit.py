@@ -1,6 +1,6 @@
-import streamlit as st
 import numpy as np
 import pandas as pd
+import streamlit as st
 import time
 import random
 import matplotlib.pyplot as plt
@@ -9,6 +9,9 @@ import plotly.graph_objects as go
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
+
+# Set Page Config at the Top
+st.set_page_config(page_title="PCOS Risk Dashboard", layout="wide")
 
 # Load and prepare dataset
 file_path = "PCOS_data.csv"
@@ -56,7 +59,6 @@ st.markdown(
 )
 
 # Dashboard Layout
-st.set_page_config(layout="wide")
 st.title("✨ PCOS Risk Assessment Dashboard ✨")
 
 with st.sidebar:
