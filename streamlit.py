@@ -1,52 +1,59 @@
-import os
+import streamlit as st
 import pandas as pd
 import numpy as np
-import streamlit as st
-import seaborn as sns
-import matplotlib.pyplot as plt
 import time
 import random
-from fpdf import FPDF
+import matplotlib.pyplot as plt
+import seaborn as sns
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
+from fpdf import FPDF
 
-# Load Dataset
+# Load and prepare dataset
 file_path = "PCOS_data.csv"
+
 def load_data():
-    try:
-        df = pd.read_csv(file_path)
-        df_cleaned = df.drop(columns=["Sl. No", "Patient File No.", "Unnamed: 44"], errors="ignore")
-        for col in df_cleaned.columns:
-            if df_cleaned[col].dtype == "object":
-                df_cleaned[col].fillna(df_cleaned[col].mode()[0], inplace=True)
-            else:
-                df_cleaned[col].fillna(df_cleaned[col].median(), inplace=True)
-        df_cleaned = df_cleaned.apply(pd.to_numeric, errors="coerce")
-        return df_cleaned
-    except Exception as e:
-        st.error(f"Error loading dataset: {e}")
-        st.stop()
+    df = pd.read_csv(file_path)
+    df_cleaned = df.drop(columns=["Sl. No", "Patient File No.", "Unnamed: 44"], errors="ignore")
+    for col in df_cleaned.columns:
+        if df_cleaned[col].dtype == "object":
+            df_cleaned[col].fillna(df_cleaned[col].mode()[0], inplace=True)
+        else:
+            df_cleaned[col].fillna(df_cleaned[col].median(), inplace=True)
+    df_cleaned = df_cleaned.apply(pd.to_numeric, errors="coerce")
+    return df_cleaned
 
 df_cleaned = load_data()
+if "PCOS (Y/N)" not in df_cleaned.columns:
+    st.error("Target column 'PCOS (Y/N)' not found in the dataset.")
+    st.stop()
+
 X = df_cleaned.drop(columns=["PCOS (Y/N)"])
 y = df_cleaned["PCOS (Y/N)"]
 X_filled = X.fillna(X.median())
 X_train, X_test, y_train, y_test = train_test_split(X_filled, y, test_size=0.2, random_state=42)
 model = RandomForestClassifier(n_estimators=100, random_state=42)
 model.fit(X_train, y_train)
+y_pred = model.predict(X_test)
+model_accuracy = accuracy_score(y_test, y_pred)
 
-# Fun Facts & PCOS Prediction Game
-st.sidebar.title("PCOS Dashboard")
-st.title("🎮 PCOS Prediction Game & Fun Facts")
+# Dashboard layout
+st.title("PCOS Health Dashboard")
+st.sidebar.write(f"✅ Model Accuracy: {model_accuracy * 100:.2f}%")
+
+# Fun Facts & PCOS Prediction
+st.header("💡 PCOS Fun Facts & Prediction Game")
 fun_facts = [
     "PCOS affects 1 in 10 women of reproductive age!",
-    "Lifestyle changes, such as exercise and a balanced diet, help manage PCOS symptoms.",
-    "PCOS is one of the leading causes of infertility in women.",
-    "Insulin resistance plays a key role in PCOS development.",
+    "Lifestyle changes can help manage PCOS symptoms.",
+    "PCOS is a leading cause of infertility in women.",
+    "Insulin resistance is a key factor in PCOS development.",
     "Maintaining a healthy weight can reduce PCOS symptoms!"
 ]
+st.write(random.choice(fun_facts))
 
+st.subheader("PCOS Prediction Game 🎯")
 user_input = []
 progress_bar = st.progress(0)
 for idx, feature in enumerate(X_filled.columns):
@@ -54,7 +61,7 @@ for idx, feature in enumerate(X_filled.columns):
     user_input.append(value)
     progress_bar.progress((idx + 1) / len(X_filled.columns))
 
-if st.button("🎲 Predict PCOS Risk!"):
+if st.button("🔍 Predict PCOS Risk!"):
     with st.spinner("Analyzing your data...🔍"):
         time.sleep(2)
         user_input = np.array(user_input).reshape(1, -1)
@@ -62,81 +69,68 @@ if st.button("🎲 Predict PCOS Risk!"):
         risk_level = random.randint(1, 100)
     
     st.subheader("🔮 Prediction Result:")
-    result_text = "High risk of PCOS" if prediction[0] == 1 else "Low risk of PCOS"
-    st.write(f"{result_text}. Estimated risk level: {risk_level}%")
-    st.write(random.choice(fun_facts))
+    if prediction[0] == 1:
+        st.error(f"⚠ High risk of PCOS. Your estimated risk level: {risk_level}%")
+    else:
+        st.success(f"✅ Low risk of PCOS. Your estimated risk level: {risk_level}%")
     
-    def generate_report():
-        pdf = FPDF()
-        pdf.add_page()
-        pdf.set_font("Arial", size=12)
-        pdf.cell(200, 10, "PCOS Prediction Report", ln=True, align='C')
-        pdf.ln(10)
-        pdf.multi_cell(0, 10, f"Prediction: {result_text}\nRisk Level: {risk_level}%")
-        pdf.ln(10)
-        pdf.multi_cell(0, 10, "Recommended Lifestyle Changes:\n- Maintain a balanced diet\n- Exercise regularly\n- Manage stress\n- Get enough sleep")
-        report_path = "PCOS_Report.pdf"
-        pdf.output(report_path)
-        return report_path
-    
-    report_path = generate_report()
+    # Generate PDF report
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+    pdf.cell(200, 10, "PCOS Prediction Report", ln=True, align='C')
+    pdf.ln(10)
+    pdf.multi_cell(0, 10, "High probability of PCOS detected." if prediction[0] == 1 else "No significant risk of PCOS detected.")
+    report_path = "PCOS_Report.pdf"
+    pdf.output(report_path)
     with open(report_path, "rb") as file:
-        st.download_button("Download Report", file, file_name="PCOS_Report.pdf")
+        st.download_button("Download PCOS Report", file, file_name="PCOS_Report.pdf")
 
 # Health Gamification
 st.header("🎮 Health Gamification")
-water_glasses = st.slider("How many glasses of water did you drink today?", min_value=0, max_value=15)
-steps = st.slider("How many steps did you walk today?", min_value=0, max_value=20000)
+water_glasses = st.slider("Glasses of water today?", 0, 15)
+steps = st.slider("Steps walked today?", 0, 20000)
+st.write(f"Total Health Points: {water_glasses * 2 + steps // 500}")
+if water_glasses >= 8: st.success("Great job on water intake!")
+if steps >= 10000: st.success("Awesome! You've walked 10,000+ steps!")
 
 # Community Support
 st.header("💬 Community Support")
-new_post = st.text_area("Post your experience or ask a question:")
-if st.button("Submit Post"):
-    if new_post:
-        st.success("Post submitted successfully!")
-    else:
-        st.warning("Please write something to post.")
+new_post = st.text_area("Share your experience or ask a question:")
+if st.button("Submit Post") and new_post:
+    st.session_state.posts.append(new_post)
+    st.success("Post submitted!")
+if "posts" in st.session_state and st.session_state.posts:
+    st.write("### Community Posts:")
+    for post in st.session_state.posts:
+        st.write(f"- {post}")
 
 # PCOS Quiz
-st.header("🧠 PCOS Quiz")
+st.header("🧠 PCOS Trivia Quiz")
 questions = {
-    "What is a common symptom of PCOS?": ["Irregular periods", "Acne", "Hair loss"],
-    "Which hormone is often imbalanced in PCOS?": ["Insulin", "Estrogen", "Progesterone"],
-    "What lifestyle change can help manage PCOS?": ["Regular exercise", "Skipping meals", "High sugar diet"]
+    "Common PCOS symptom?": ["Irregular periods", "Acne", "Hair loss"],
+    "Hormone imbalance in PCOS?": ["Insulin", "Estrogen", "Progesterone"],
+    "Best lifestyle change for PCOS?": ["Exercise", "Skipping meals", "High sugar diet"]
 }
-quiz_score = 0
-for question, options in questions.items():
-    answer = st.radio(question, options)
-    if answer == options[0]:
-        quiz_score += 1
-st.write(f"Your final quiz score: {quiz_score}/{len(questions)}")
+quiz_score = sum(1 for q, opts in questions.items() if st.radio(q, opts) == opts[0])
+st.write(f"Final quiz score: {quiz_score}/{len(questions)}")
 
 # Mood Tracker
 st.header("😊 Mood Tracker")
 mood = st.selectbox("How do you feel today?", ["Happy", "Excited", "Neutral", "Sad", "Anxious"])
-mood_advice = {
-    "Happy": "Keep up the great energy! 🌟",
-    "Excited": "Enjoy the excitement! 🌈",
-    "Neutral": "It's okay to feel neutral, take it easy. ☁",
-    "Sad": "Take care of yourself, things will get better. 💙",
-    "Anxious": "Try some deep breaths, you're doing well. 🌱"
-}
 st.write(f"You are feeling: {mood}")
-st.write(mood_advice.get(mood, "Stay strong!"))
 
 # PCOS-Friendly Recipes
 st.header("🍲 PCOS-Friendly Recipes")
 recipes = [
-    {"name": "Spinach & Chickpea Curry", "ingredients": ["Spinach", "Chickpeas", "Coconut milk", "Garlic", "Ginger"]},
-    {"name": "Oats Pancakes", "ingredients": ["Oats", "Eggs", "Banana", "Almond milk"]},
-    {"name": "Greek Yogurt Salad", "ingredients": ["Greek Yogurt", "Cucumber", "Olives", "Olive oil", "Lemon"]},
+    {"name": "Spinach & Chickpea Curry", "ingredients": ["Spinach", "Chickpeas", "Coconut milk"]},
+    {"name": "Oats Pancakes", "ingredients": ["Oats", "Eggs", "Banana"]},
+    {"name": "Greek Yogurt Salad", "ingredients": ["Greek Yogurt", "Cucumber", "Olives"]}
 ]
 for recipe in recipes:
     st.subheader(recipe["name"])
     st.write("Ingredients:", ", ".join(recipe["ingredients"]))
 
-# 3D Model Display
+# 3D Model of PCOS
 st.header("🩺 Explore PCOS in 3D")
-model_url = "https://sketchfab.com/models/62bfb490ad344caaaea675da9df7ba34/embed"
-st.write("Rotate, zoom, and explore the PCOS-related anatomy interactively.")
-st.components.v1.iframe(model_url, height=500)
+st.components.v1.iframe("https://sketchfab.com/models/62bfb490ad344caaaea675da9df7ba34/embed", height=500)
