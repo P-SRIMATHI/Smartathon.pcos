@@ -38,42 +38,49 @@ try:
     
     y_pred = model.predict(X_test)
     model_accuracy = accuracy_score(y_test, y_pred)
-    st.sidebar.write(f"✅ Model Accuracy: {model_accuracy * 100:.2f}%")
 except Exception as e:
     st.error(f"Error loading dataset: {e}")
     st.stop()
 
-# Interactive PCOS Information Section
+# Dashboard Layout
+st.set_page_config(layout="wide")
+st.title("PCOS Risk Assessment Dashboard")
+
+with st.sidebar:
+    st.header("Navigation")
+    page = st.radio("Go to", ["PCOS Awareness", "PCOS Prediction", "Lifestyle Quiz"])
+    st.write(f"✅ Model Accuracy: {model_accuracy * 100:.2f}%")
+
+# PCOS Awareness Section
 def pcos_awareness():
-    st.title("🔍 Understanding PCOS")
-    st.markdown("## What is PCOS?")
+    st.header("🔍 Understanding PCOS")
+    st.subheader("What is PCOS?")
     st.write("PCOS (Polycystic Ovary Syndrome) is a common hormonal disorder affecting people with ovaries.")
     
-    st.markdown("### Symptoms of PCOS")
-    symptoms = ["Irregular periods", "Excess hair growth", "Acne or oily skin", "Weight gain", "Thinning hair"]
-    st.write("\n".join([f"- {symptom}" for symptom in symptoms]))
-    
-    st.markdown("### Causes of PCOS")
-    causes = ["Hormonal imbalances", "Genetic factors", "Insulin resistance", "Inflammation"]
-    st.write("\n".join([f"- {cause}" for cause in causes]))
-    
-    st.markdown("### Risks of PCOS")
-    risks = ["Infertility", "Type 2 diabetes", "High blood pressure", "Heart disease", "Depression"]
-    st.write("\n".join([f"- {risk}" for risk in risks]))
-    
-    if st.button("Proceed to PCOS Risk Prediction ➡️"):
-        st.session_state['page'] = 'prediction'
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.subheader("Symptoms")
+        symptoms = ["Irregular periods", "Excess hair growth", "Acne or oily skin", "Weight gain", "Thinning hair"]
+        st.write("\n".join([f"- {symptom}" for symptom in symptoms]))
+    with col2:
+        st.subheader("Causes")
+        causes = ["Hormonal imbalances", "Genetic factors", "Insulin resistance", "Inflammation"]
+        st.write("\n".join([f"- {cause}" for cause in causes]))
+    with col3:
+        st.subheader("Risks")
+        risks = ["Infertility", "Type 2 diabetes", "High blood pressure", "Heart disease", "Depression"]
+        st.write("\n".join([f"- {risk}" for risk in risks]))
 
-# PCOS Risk Prediction
+# PCOS Prediction Section
 def pcos_prediction():
-    st.title("🧪 PCOS Prediction")
+    st.header("🧪 PCOS Prediction")
     user_input = []
-    progress_bar = st.progress(0)
     
+    col1, col2 = st.columns(2)
     for idx, feature in enumerate(X_filled.columns):
-        value = st.number_input(f"Enter your {feature}", min_value=0.0, format="%.2f")
-        user_input.append(value)
-        progress_bar.progress((idx + 1) / len(X_filled.columns))
+        with col1 if idx % 2 == 0 else col2:
+            value = st.number_input(f"Enter your {feature}", min_value=0.0, format="%.2f")
+            user_input.append(value)
     
     if st.button("Predict PCOS Risk!"):
         with st.spinner("Analyzing data..."):
@@ -82,17 +89,16 @@ def pcos_prediction():
             prediction = model.predict(user_input)
             risk_level = random.randint(1, 100)
         
+        st.subheader(f"📊 Estimated Risk Level: {risk_level}%")
         if prediction[0] == 0:
-            st.success(f"✅ Low risk of PCOS. Estimated risk level: {risk_level}%")
+            st.success("✅ Low risk of PCOS")
         else:
-            st.warning(f"⚠️ High risk of PCOS. Estimated risk level: {risk_level}%")
-        
-        if st.button("Take the PCOS Lifestyle Quiz ➡️"):
-            st.session_state['page'] = 'quiz'
+            st.warning("⚠️ High risk of PCOS")
 
-# PCOS Lifestyle Quiz
-def personality_quiz():
-    st.title("🩺 PCOS Lifestyle Risk Assessment")
+# PCOS Lifestyle Quiz Section
+def lifestyle_quiz():
+    st.header("🩺 PCOS Lifestyle Risk Assessment")
+    
     questions = {
         "How often do you exercise?": {"Daily": 0, "3-5 times a week": 10, "1-2 times a week": 20, "Rarely": 30},
         "How would you rate your diet?": {"Excellent": 0, "Good": 10, "Average": 20, "Poor": 30},
@@ -113,21 +119,10 @@ def personality_quiz():
         st.warning("⚠️ Moderate risk! Consider improving lifestyle choices.")
     else:
         st.error("🚨 High risk! Seek medical advice.")
-    
-    if st.button("Back to Home 🏠"):
-        st.session_state['page'] = 'awareness'
 
-# Main Navigation
-def main():
-    if 'page' not in st.session_state:
-        st.session_state['page'] = 'awareness'
-    
-    if st.session_state['page'] == 'awareness':
-        pcos_awareness()
-    elif st.session_state['page'] == 'prediction':
-        pcos_prediction()
-    elif st.session_state['page'] == 'quiz':
-        personality_quiz()
-
-if __name__ == "__main__":
-    main()
+if page == "PCOS Awareness":
+    pcos_awareness()
+elif page == "PCOS Prediction":
+    pcos_prediction()
+elif page == "Lifestyle Quiz":
+    lifestyle_quiz()
