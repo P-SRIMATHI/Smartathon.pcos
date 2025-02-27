@@ -128,7 +128,8 @@ st.sidebar.write(f"✅ **Model Accuracy:** {model_acc * 100:.2f}%")
 
 risk_score = personality_quiz()
 risk_percentage = risk_meter_animation(risk_score)
-lifestyle_recommendations(risk_percentage)import streamlit as st
+lifestyle_recommendations(risk_percentage)
+import streamlit as st
 import random
 import time
 import plotly.graph_objects as go
