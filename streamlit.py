@@ -84,6 +84,11 @@ def risk_spin_wheel(risk_score):
     ))
     st.plotly_chart(fig)
     
+    if risk_percentage < 30:
+        st.balloons()
+    elif risk_percentage > 70:
+        st.warning("🚨 High Risk! Consider consulting a doctor.")
+    
     return risk_percentage
 
 # ================== Achievements & Badges ==================
@@ -92,10 +97,23 @@ def show_badges(risk_percentage):
     
     if risk_percentage < 30:
         st.success("🥇 **Hormone Hero!** You’re doing great! Keep up the healthy lifestyle! 💪")
+        st.audio("success_sound.mp3")
     elif risk_percentage < 60:
         st.warning("⚠️ **Balance Seeker!** You're on the right path but can make improvements!")
     else:
         st.error("🚨 **PCOS Warrior!** You might be at high risk. Consider consulting a doctor.")
+        st.audio("alert_sound.mp3")
+
+# ================== Lifestyle Recommendation System ==================
+def lifestyle_recommendations(risk_percentage):
+    st.subheader("💡 Personalized Lifestyle Recommendations")
+    
+    if risk_percentage < 30:
+        st.write("✅ Maintain a balanced diet with whole foods and regular physical activity!")
+    elif risk_percentage < 60:
+        st.write("⚠️ Try increasing your exercise and reducing processed foods!")
+    else:
+        st.write("🚨 Prioritize health checkups and stress management techniques like yoga!")
 
 # ================== Mini Health Challenges ==================
 def health_challenges():
@@ -108,6 +126,8 @@ def health_challenges():
     ]
     challenge = random.choice(challenge_list)
     st.write(f"**Your challenge:** {challenge}")
+    if st.button("Complete Challenge ✅"):
+        st.success("Great job! Keep up the healthy habits! 💪")
 
 # ================== Main Execution ==================
 X_data, y_data = load_and_preprocess_data()
@@ -117,4 +137,5 @@ st.sidebar.write(f"✅ **Model Accuracy:** {model_acc * 100:.2f}%")
 risk_score = personality_quiz()
 risk_percentage = risk_spin_wheel(risk_score)
 show_badges(risk_percentage)
+lifestyle_recommendations(risk_percentage)
 health_challenges()
