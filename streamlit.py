@@ -94,6 +94,28 @@ def pcos_prediction():
             st.success("✅ Low risk of PCOS")
         else:
             st.warning("⚠️ High risk of PCOS")
+# Graphs and Data Visualization
+st.header("2. Data Visualizations 📊")
+st.subheader("PCOS Prevalence in Different Studies")
+
+# Data from different studies
+study_labels = ["Tamil Nadu (18%)", "Mumbai (22.5%)", "Lucknow (3.7%)", "NIH Criteria (7.2%)", "Rotterdam Criteria (19.6%)"]
+study_values = [18, 22.5, 3.7, 7.2, 19.6]
+
+fig, ax = plt.subplots()
+sns.barplot(x=study_labels, y=study_values, ax=ax)
+ax.set_ylabel("Prevalence (%)")
+ax.set_xlabel("Study Locations & Criteria")
+ax.set_title("PCOS Prevalence in Different Studies")
+plt.xticks(rotation=30, ha='right')
+st.pyplot(fig)
+
+st.subheader("SHAP Model Impact")
+explainer = shap.TreeExplainer(model)
+shap_values = explainer.shap_values(X_test)
+fig, ax = plt.subplots()
+shap.summary_plot(shap_values, X_test, feature_names=selected_features, show=False)
+st.pyplot(fig)
 
 # PCOS Lifestyle Quiz Section
 def lifestyle_quiz():
