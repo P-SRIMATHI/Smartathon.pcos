@@ -5,6 +5,7 @@ import time
 import random
 import matplotlib.pyplot as plt
 import seaborn as sns
+import plotly.graph_objects as go
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
@@ -59,13 +60,32 @@ health_tips = [
     "🧘‍♀️ Manage stress with yoga, meditation, or deep breathing techniques."
 ]
 
+# Function to create a dynamic gauge chart for risk level
+def risk_meter(score):
+    fig = go.Figure(go.Indicator(
+        mode="gauge+number",
+        value=score,
+        title={'text': "PCOS Risk Level"},
+        gauge={
+            'axis': {'range': [0, 100]},
+            'bar': {'color': "red" if score > 70 else "orange" if score > 40 else "green"},
+            'steps': [
+                {'range': [0, 40], 'color': "lightgreen"},
+                {'range': [40, 70], 'color': "yellow"},
+                {'range': [70, 100], 'color': "red"}
+            ]
+        }
+    ))
+    return fig
+
 # Streamlit UI for PCOS Prediction
 def pcos_prediction_game():
     st.title("🎮 PCOS Prediction Game")
-    st.write("Answer the following questions and unlock insights! 🎯")
+    st.write("Answer the following questions to unlock insights! 🎯")
     
     user_input = []
     progress_bar = st.progress(0)
+    
     for idx, feature in enumerate(X_filled.columns):
         value = st.number_input(f"Enter your {feature}", min_value=0.0, format="%.2f")
         user_input.append(value)
@@ -85,138 +105,16 @@ def pcos_prediction_game():
             for tip in random.sample(health_tips, 3):
                 st.write(f"- {tip}")
             
-            # Show a gauge chart for risk level
+            # Show a dynamic gauge chart for risk level
             st.write("### 📊 Your Risk Level")
-            fig, ax = plt.subplots()
-            sns.barplot(x=["Low", "Medium", "High"], y=[30, 60, 90], color='lightgray')
-            ax.bar(["Low", "Medium", "High"], [30, 60, risk_level], color=['green', 'orange', 'red'])
-            st.pyplot(fig)
+            st.plotly_chart(risk_meter(risk_level))
+        else:
+            st.warning(f"⚠️ High risk of PCOS. Your estimated risk level: {risk_level}%")
+            st.write("It's important to focus on your health and consider making lifestyle changes.")
     
     st.write("\nThank you for playing! 🌟")
 
-# Run the game in Streamlit
-pcos_prediction_game()
-
-import streamlit as st
-import random
-import time
-import plotly.graph_objects as go
-
-def risk_meter(score):
-    fig = go.Figure(go.Indicator(
-        mode="gauge+number",
-        value=score,
-        title={'text': "PCOS Risk Level"},
-        gauge={
-            'axis': {'range': [0, 100]},
-            'bar': {'color': "red" if score > 70 else "orange" if score > 40 else "green"},
-            'steps': [
-                {'range': [0, 40], 'color': "lightgreen"},
-                {'range': [40, 70], 'color': "yellow"},
-                {'range': [70, 100], 'color': "red"}
-            ]
-        }
-    ))
-    return fig
-
-def spin_the_wheel():
-    tips = [
-        "Drink 8 glasses of water today! 💧", 
-        "Do 10 minutes of stretching! 🧘", 
-        "Try a sugar-free day! 🍎", 
-        "Take a deep-breathing break! 😌"
-    ]
-    return random.choice(tips)
-
-import streamlit as st
-import datetime
-
-def community_forum():
-    # Initialize session state for forum data
-    if "posts" not in st.session_state:
-        st.session_state.posts = []
-        st.session_state.upvotes = {}
-        st.session_state.reports = {}
-
-    st.title("🌍 PCOS Community Forum")
-    st.markdown("### Share experiences, tips, and support with others!")
-
-    # Community Guidelines
-    with st.expander("📜 Community Guidelines"):
-        st.write("1. Be respectful and supportive. 💙")
-        st.write("2. No medical advice – consult a professional. ⚕️")
-        st.write("3. Report inappropriate content. 🚨")
-
-    # Daily Prompt
-    st.sidebar.header("💡 Daily Discussion Topic")
-    daily_topics = [
-        "How do you manage PCOS symptoms?",
-        "Share your favorite PCOS-friendly recipe! 🍲",
-        "Tips for staying motivated on your health journey! 💪"
-    ]
-    st.sidebar.write(f"🔹 {daily_topics[datetime.date.today().day % len(daily_topics)]}")
-
-    # New Post Form
-    with st.form("new_post"):
-        user_name = st.text_input("Your Name (or leave blank for anonymous):")
-        user_message = st.text_area("Share your experience or ask a question:")
-        submit_button = st.form_submit_button("Post")
-        
-        if submit_button and user_message:
-            user_name = user_name if user_name else "Anonymous"
-            post_id = len(st.session_state.posts)
-            st.session_state.posts.append((post_id, user_name, user_message))
-            st.session_state.upvotes[post_id] = 0
-            st.session_state.reports[post_id] = 0
-            st.success("✅ Post shared successfully!")
-
-    st.markdown("---")
-
-    # Search and Filter
-    search_query = st.text_input("🔍 Search posts:")
-    st.markdown("---")
-
-    # Display Posts
-    if st.session_state.posts:
-        for post_id, name, message in reversed(st.session_state.posts):
-            if search_query.lower() in message.lower():
-                st.markdown(f"**{name}:** {message}")
-                
-                # Upvote Button
-                if st.button(f"👍 {st.session_state.upvotes[post_id]}", key=f"upvote_{post_id}"):
-                    st.session_state.upvotes[post_id] += 1
-                
-                # Report Button
-                if st.button("🚨 Report", key=f"report_{post_id}"):
-                    st.session_state.reports[post_id] += 1
-                    st.warning("⚠️ Post reported. Moderators will review it soon.")
-                
-                st.markdown("---")
-
-    # Sidebar Features
-    st.sidebar.header("🏆 Leaderboard")
-    st.sidebar.write("Top contributors will earn badges!")
-
-    st.sidebar.header("📆 Upcoming Events")
-    st.sidebar.write("- Live Q&A with experts - [Join Here](#)")
-    st.sidebar.write("- PCOS Wellness Challenge - [Sign Up](#)")
-
-    st.sidebar.header("📖 Resource Library")
-    st.sidebar.write("- [PCOS Diet Guide](#)")
-    st.sidebar.write("- [Exercise Tips](#)")
-    st.sidebar.write("- [Mental Health Support](#)")
-
-    st.sidebar.header("🩺 Ask an Expert")
-    st.sidebar.write("Have a question for a specialist? [Submit Here](#)")
-
-    st.sidebar.header("🎯 Wellness Challenges")
-    st.sidebar.write("Join fitness and mindfulness challenges! [Explore](#)")
-
-# Run the app
-if __name__ == "__main__":
-    community_forum()
-
-
+# Function for Personality Quiz
 def personality_quiz():
     st.title("🩺 PCOS Lifestyle Risk Assessment")
     st.markdown("#### Answer these questions to assess your risk level.")
@@ -281,12 +179,11 @@ def main():
         st.error("🚑 Immediate action is recommended!")
     
     if st.button("🎡 Spin the Wheel for a Health Tip!"):
-        st.write(spin_the_wheel())
+        st.write(random.choice(health_tips))
     
     st.markdown("---")
-    community_forum()
-    
+    pcos_prediction_game()
+
+# Run the app
 if __name__ == "__main__":
     main()
-
- 
