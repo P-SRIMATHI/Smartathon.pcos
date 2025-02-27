@@ -128,34 +128,89 @@ def spin_the_wheel():
     ]
     return random.choice(tips)
 
-def community_forum():
-    st.title("🌍 PCOS Community Forum")
-    st.markdown("### Share experiences, tips, and support with others!")
+import streamlit as st
+import datetime
+
+# Initialize session state for forum data
+if "posts" not in st.session_state:
+    st.session_state.posts = []
+    st.session_state.upvotes = {}
+    st.session_state.reports = {}
+
+st.title("🌍 PCOS Community Forum")
+st.markdown("### Share experiences, tips, and support with others!")
+
+# Community Guidelines
+with st.expander("📜 Community Guidelines"):
+    st.write("1. Be respectful and supportive. 💙")
+    st.write("2. No medical advice – consult a professional. ⚕️")
+    st.write("3. Report inappropriate content. 🚨")
+
+# Daily Prompt
+st.sidebar.header("💡 Daily Discussion Topic")
+daily_topics = [
+    "How do you manage PCOS symptoms?",
+    "Share your favorite PCOS-friendly recipe! 🍲",
+    "Tips for staying motivated on your health journey! 💪"
+]
+st.sidebar.write(f"🔹 {daily_topics[datetime.date.today().day % len(daily_topics)]}")
+
+# New Post Form
+with st.form("new_post"):
+    user_name = st.text_input("Your Name (or leave blank for anonymous):")
+    user_message = st.text_area("Share your experience or ask a question:")
+    submit_button = st.form_submit_button("Post")
     
-    if "posts" not in st.session_state:
-        st.session_state.posts = []
-        st.session_state.upvotes = {}
-    
-    with st.form("new_post"):
-        user_name = st.text_input("Your Name (or leave blank for anonymous):")
-        user_message = st.text_area("Share your experience or ask a question:")
-        submit_button = st.form_submit_button("Post")
-        
-        if submit_button and user_message:
-            user_name = user_name if user_name else "Anonymous"
-            post_id = len(st.session_state.posts)
-            st.session_state.posts.append((post_id, user_name, user_message))
-            st.session_state.upvotes[post_id] = 0
-            st.success("✅ Post shared successfully!")
-    
-    st.markdown("---")
-    
-    if st.session_state.posts:
-        for post_id, name, message in reversed(st.session_state.posts):
+    if submit_button and user_message:
+        user_name = user_name if user_name else "Anonymous"
+        post_id = len(st.session_state.posts)
+        st.session_state.posts.append((post_id, user_name, user_message))
+        st.session_state.upvotes[post_id] = 0
+        st.session_state.reports[post_id] = 0
+        st.success("✅ Post shared successfully!")
+
+st.markdown("---")
+
+# Search and Filter
+search_query = st.text_input("🔍 Search posts:")
+st.markdown("---")
+
+# Display Posts
+if st.session_state.posts:
+    for post_id, name, message in reversed(st.session_state.posts):
+        if search_query.lower() in message.lower():
             st.markdown(f"**{name}:** {message}")
+            
+            # Upvote Button
             if st.button(f"👍 {st.session_state.upvotes[post_id]}", key=f"upvote_{post_id}"):
                 st.session_state.upvotes[post_id] += 1
+            
+            # Report Button
+            if st.button("🚨 Report", key=f"report_{post_id}"):
+                st.session_state.reports[post_id] += 1
+                st.warning("⚠️ Post reported. Moderators will review it soon.")
+            
             st.markdown("---")
+
+# Sidebar Features
+st.sidebar.header("🏆 Leaderboard")
+st.sidebar.write("Top contributors will earn badges!")
+
+st.sidebar.header("📆 Upcoming Events")
+st.sidebar.write("- Live Q&A with experts - [Join Here](#)")
+st.sidebar.write("- PCOS Wellness Challenge - [Sign Up](#)")
+
+st.sidebar.header("📖 Resource Library")
+st.sidebar.write("- [PCOS Diet Guide](#)")
+st.sidebar.write("- [Exercise Tips](#)")
+st.sidebar.write("- [Mental Health Support](#)")
+
+st.sidebar.header("🩺 Ask an Expert")
+st.sidebar.write("Have a question for a specialist? [Submit Here](#)")
+
+st.sidebar.header("🎯 Wellness Challenges")
+st.sidebar.write("Join fitness and mindfulness challenges! [Explore](#)")
+
 
 def personality_quiz():
     st.title("🩺 PCOS Lifestyle Risk Assessment")
