@@ -29,6 +29,35 @@ def spin_the_wheel():
     ]
     return random.choice(tips)
 
+def community_forum():
+    st.title("🌍 PCOS Community Forum")
+    st.markdown("### Share experiences, tips, and support with others!")
+    
+    if "posts" not in st.session_state:
+        st.session_state.posts = []
+        st.session_state.upvotes = {}
+    
+    with st.form("new_post"):
+        user_name = st.text_input("Your Name (or leave blank for anonymous):")
+        user_message = st.text_area("Share your experience or ask a question:")
+        submit_button = st.form_submit_button("Post")
+        
+        if submit_button and user_message:
+            user_name = user_name if user_name else "Anonymous"
+            post_id = len(st.session_state.posts)
+            st.session_state.posts.append((post_id, user_name, user_message))
+            st.session_state.upvotes[post_id] = 0
+            st.success("✅ Post shared successfully!")
+    
+    st.markdown("---")
+    
+    if st.session_state.posts:
+        for post_id, name, message in reversed(st.session_state.posts):
+            st.markdown(f"**{name}:** {message}")
+            if st.button(f"👍 {st.session_state.upvotes[post_id]}", key=f"upvote_{post_id}"):
+                st.session_state.upvotes[post_id] += 1
+            st.markdown("---")
+
 def personality_quiz():
     st.title("🩺 PCOS Lifestyle Risk Assessment")
     st.markdown("#### Answer these questions to assess your risk level.")
@@ -44,9 +73,9 @@ def personality_quiz():
     score = 0
     for question, options in questions.items():
         answer = st.radio(question, list(options.keys()), index=0)
-        score += options[answer]  # Assign appropriate risk scores
-        st.progress(score // (len(questions) * 3))  # Normalize progress bar
-        time.sleep(0.3)  # Smooth progress animation
+        score += options[answer]
+        st.progress(score // (len(questions) * 3))
+        time.sleep(0.3)
     
     return score
 
@@ -94,6 +123,9 @@ def main():
     
     if st.button("🎡 Spin the Wheel for a Health Tip!"):
         st.write(spin_the_wheel())
+    
+    st.markdown("---")
+    community_forum()
     
 if __name__ == "__main__":
     main()
