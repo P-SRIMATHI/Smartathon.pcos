@@ -84,7 +84,7 @@ def main():
         st.error("🚑 Immediate action is recommended!")
     
     if st.button("🎡 Spin the Wheel for a Health Tip!"):
-        st.success(spin_the_wheel())
+        st.write(spin_the_wheel())
     
 if __name__ == "__main__":
     main()
