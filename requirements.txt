@@ -1,10 +1,2 @@
-numpy
-pandas
-streamlit
-matplotlib
-seaborn
-plotly
-scikit-learn
-random
-time
-pydub
+streamlit>=1.10.0
+plotly>=5.0.0
