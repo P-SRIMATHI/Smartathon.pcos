@@ -15,7 +15,7 @@ import streamlit.components.v1 as components
 
 # PCOS Information Section
 st.title("Understanding PCOS 🩺")
-st.write("Polycystic Ovary Syndrome (PCOS) is a common hormonal disorder that affects women of reproductive age.PCOS affects 1 in 10 women of reproductive age!Lifestyle changes, such as exercise and a balanced diet, can help manage PCOS symptoms.PCOS is one of the leading causes of infertility in women.Insulin resistance is a key factor in PCOS development.Maintaining a healthy weight can reduce PCOS symptoms!")
+st.write("Polycystic Ovary Syndrome (PCOS) is a common hormonal disorder that affects women of reproductive age.")
 st.subheader("Causes of PCOS")
 st.write("- Insulin resistance\n- Hormonal imbalances\n- Genetic factors\n- Inflammation")
 st.subheader("Symptoms of PCOS")
@@ -24,9 +24,9 @@ st.subheader("Risks Associated with PCOS")
 st.write("- Infertility\n- Type 2 diabetes\n- Cardiovascular disease\n- Mental health issues like anxiety and depression")
 
 # Fun facts and PCOS Prediction Game
-st.header("PCOS Prediction Game 🎮")
+st.header("Fun Facts & PCOS Prediction Game 🎮")
 fun_facts = [
-    "",
+    "Did you know? PCOS affects 1 in 10 women of reproductive age!",
     "Lifestyle changes, such as exercise and a balanced diet, can help manage PCOS symptoms.",
     "PCOS is one of the leading causes of infertility in women.",
     "Insulin resistance is a key factor in PCOS development.",
