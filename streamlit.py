@@ -22,6 +22,7 @@ def risk_meter(score):
 
 def personality_quiz():
     st.title("🩺 PCOS Lifestyle Risk Assessment")
+    st.markdown("#### Answer these questions to assess your risk level.")
     
     questions = {
         "How often do you exercise?": ["Rarely", "1-2 times a week", "3-5 times a week", "Daily"],
@@ -36,30 +37,30 @@ def personality_quiz():
         answer = st.radio(question, options, index=1)
         score += options.index(answer) * 25  # Assign risk scores dynamically
         st.progress(score // len(questions))
-        time.sleep(0.5)  # Simulate progress
+        time.sleep(0.3)  # Smooth progress animation
     
     return score
 
 def get_recommendations(score):
     if score < 40:
-        return "Great job! Keep up your healthy habits! 🌟"
+        return "✅ You're doing great! Keep maintaining a balanced lifestyle."
     elif score < 70:
-        return "You're doing well, but there's room for improvement. Consider more balanced meals and exercise! 🏋️‍♀️"
+        return "⚠️ Consider improving your diet and exercise habits to lower risk."
     else:
-        return "Your lifestyle suggests a higher risk. Consult a specialist and make small, sustainable changes! ❤️"
+        return "🚨 High risk detected! Consult a healthcare provider and adopt healthier habits."
 
 def get_motivational_message():
     messages = [
-        "Your health journey starts with small steps! 🚶‍♀️",
-        "Consistency is key to a healthier you! 🔑",
-        "Healthy habits today mean a better future! 🌱",
-        "Your body loves when you take care of it! ❤️"
+        "🌟 Every step towards a healthier you is a victory!",
+        "🏆 Small changes today lead to a healthier tomorrow!",
+        "💖 Your health matters—take care of yourself!",
+        "🔥 Keep pushing forward, your body will thank you!"
     ]
     return random.choice(messages)
 
 def main():
     score = personality_quiz()
-    st.subheader("📊 Your PCOS Risk Score: " + str(score))
+    st.subheader(f"📊 Your PCOS Risk Score: **{score}**")
     st.plotly_chart(risk_meter(score))
     
     st.markdown(f"### 💡 {get_recommendations(score)}")
@@ -70,7 +71,8 @@ def main():
     elif score < 70:
         st.snow()
     else:
-        st.error("⚠️ Consider lifestyle changes and consult a doctor!")
+        st.warning("⚠️ Consider lifestyle changes and consult a doctor!")
+        st.error("🚑 Immediate action is recommended!")
 
 if __name__ == "__main__":
     main()
