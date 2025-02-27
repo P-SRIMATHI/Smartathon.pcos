@@ -5,94 +5,116 @@ import time
 import random
 import matplotlib.pyplot as plt
 import seaborn as sns
+import plotly.graph_objects as go
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 
-# Load and prepare dataset
-file_path = "PCOS_data.csv"
-try:
+# Streamlit App Title
+st.set_page_config(page_title="PCOS Prediction Game", layout="wide")
+st.title("🎮 PCOS Prediction Game")
+st.markdown("Engage in an interactive way to assess your risk level for PCOS!")
+
+# ================== Data Preprocessing ==================
+@st.cache_data
+def load_and_preprocess_data():
+    file_path = "PCOS_data.csv"
     df = pd.read_csv(file_path)
+    
     df_cleaned = df.drop(columns=["Sl. No", "Patient File No.", "Unnamed: 44"], errors="ignore")
     
-    # Handle missing values
     for col in df_cleaned.columns:
         if df_cleaned[col].dtype == "object":
             df_cleaned[col].fillna(df_cleaned[col].mode()[0], inplace=True)
         else:
             df_cleaned[col].fillna(df_cleaned[col].median(), inplace=True)
     
-    # Convert non-numeric columns to numeric
     df_cleaned = df_cleaned.apply(pd.to_numeric, errors="coerce")
 
-    # Define features (X) and target variable (y)
     if "PCOS (Y/N)" not in df_cleaned.columns:
-        raise ValueError("Target column 'PCOS (Y/N)' not found in the dataset.")
+        st.error("Error: Target column 'PCOS (Y/N)' not found in dataset.")
+        st.stop()
     
     X = df_cleaned.drop(columns=["PCOS (Y/N)"])
     y = df_cleaned["PCOS (Y/N)"]
     
-    # Handle missing values in features
-    X_filled = X.fillna(X.median())
-    
-    # Split dataset into training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(X_filled, y, test_size=0.2, random_state=42)
-    
-    # Train the RandomForest model
-    model = RandomForestClassifier(n_estimators=100, random_state=42)
+    return X, y
+
+@st.cache_resource
+def train_model(X, y):
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    model = RandomForestClassifier(n_estimators=150, max_depth=10, random_state=42)
     model.fit(X_train, y_train)
-    
-    # Test model accuracy
-    y_pred = model.predict(X_test)
-    model_accuracy = accuracy_score(y_test, y_pred)
-    st.sidebar.write(f"✅ Model Accuracy: {model_accuracy * 100:.2f}%")
-except Exception as e:
-    st.error(f"Error loading dataset: {e}")
-    st.stop()
+    accuracy = accuracy_score(y_test, model.predict(X_test))
+    return model, accuracy
 
-# Health tips
-health_tips = [
-    "🌱 Eat a balanced diet rich in whole foods and fiber!",
-    "🏃‍♀️ Regular exercise can improve insulin sensitivity and overall health.",
-    "💧 Stay hydrated! Drinking enough water helps in hormonal balance.",
-    "😴 Prioritize sleep! Aim for 7-9 hours to regulate hormones.",
-    "🧘‍♀️ Manage stress with yoga, meditation, or deep breathing techniques."
-]
+# ================== Personality Quiz Approach ==================
+def personality_quiz():
+    st.subheader("📝 Answer These Fun Questions!")
+    risk_score = 0
+    
+    fatigue = st.radio("How often do you feel fatigued?", ["🔋 Rarely", "😴 Sometimes", "🛌 Often", "🛑 Always"])
+    if fatigue == "🛑 Always": risk_score += 3
+    elif fatigue == "🛌 Often": risk_score += 2
+    elif fatigue == "😴 Sometimes": risk_score += 1
+    
+    diet = st.radio("How would you describe your diet?", ["🍏 Healthy", "🍔 Fast food sometimes", "🍕 Mostly unhealthy", "🥤 Poor diet"])
+    if diet == "🥤 Poor diet": risk_score += 3
+    elif diet == "🍕 Mostly unhealthy": risk_score += 2
+    elif diet == "🍔 Fast food sometimes": risk_score += 1
+    
+    exercise = st.radio("How often do you exercise?", ["🏃‍♀️ Regularly", "🚶 Occasionally", "🛋️ Rarely", "❌ Never"])
+    if exercise == "❌ Never": risk_score += 3
+    elif exercise == "🛋️ Rarely": risk_score += 2
+    elif exercise == "🚶 Occasionally": risk_score += 1
+    
+    return risk_score
 
-# Streamlit UI for PCOS Prediction
-def pcos_prediction_game():
-    st.title("🎮 PCOS Prediction Game")
-    st.write("Answer the following questions and unlock insights! 🎯")
+# ================== Risk Reveal with Spin Wheel ==================
+def risk_spin_wheel(risk_score):
+    st.subheader("🎡 Your Risk Level!")
     
-    user_input = []
-    progress_bar = st.progress(0)
-    for idx, feature in enumerate(X_filled.columns):
-        value = st.number_input(f"Enter your {feature}", min_value=0.0, format="%.2f")
-        user_input.append(value)
-        progress_bar.progress((idx + 1) / len(X_filled.columns))
+    risk_percentage = min(risk_score * 10, 100)
+    fig = go.Figure(go.Indicator(
+        mode="gauge+number",
+        value=risk_percentage,
+        title={"text": "PCOS Risk Level"},
+        gauge={"axis": {"range": [0, 100]},
+               "bar": {"color": "red" if risk_percentage > 50 else "green"}}
+    ))
+    st.plotly_chart(fig)
     
-    if st.button("🎲 Predict PCOS Risk!"):
-        with st.spinner("Analyzing your data...🔍"):
-            time.sleep(2)  # Simulate processing time
-            user_input = np.array(user_input).reshape(1, -1)
-            prediction = model.predict(user_input)
-            risk_level = random.randint(1, 100)
-        
-        if prediction[0] == 0:
-            st.success(f"✅ Low risk of PCOS. Your estimated risk level: {risk_level}%")
-            st.write("Great job! Keep maintaining a healthy lifestyle. 💪")
-            st.write("Here are some additional health tips for you:")
-            for tip in random.sample(health_tips, 3):
-                st.write(f"- {tip}")
-            
-            # Show a gauge chart for risk level
-            st.write("### 📊 Your Risk Level")
-            fig, ax = plt.subplots()
-            sns.barplot(x=["Low", "Medium", "High"], y=[30, 60, 90], color='lightgray')
-            ax.bar(["Low", "Medium", "High"], [30, 60, risk_level], color=['green', 'orange', 'red'])
-            st.pyplot(fig)
-    
-    st.write("\nThank you for playing! 🌟")
+    return risk_percentage
 
-# Run the game in Streamlit
-pcos_prediction_game()
+# ================== Achievements & Badges ==================
+def show_badges(risk_percentage):
+    st.subheader("🏆 Your Achievement")
+    
+    if risk_percentage < 30:
+        st.success("🥇 **Hormone Hero!** You’re doing great! Keep up the healthy lifestyle! 💪")
+    elif risk_percentage < 60:
+        st.warning("⚠️ **Balance Seeker!** You're on the right path but can make improvements!")
+    else:
+        st.error("🚨 **PCOS Warrior!** You might be at high risk. Consider consulting a doctor.")
+
+# ================== Mini Health Challenges ==================
+def health_challenges():
+    st.subheader("🎯 Mini Health Challenge")
+    challenge_list = [
+        "🏃‍♀️ Do 10 jumping jacks now!",
+        "🥗 Eat a fruit or veggie today!",
+        "🧘 Take 3 deep breaths and relax!",
+        "💧 Drink a glass of water now!"
+    ]
+    challenge = random.choice(challenge_list)
+    st.write(f"**Your challenge:** {challenge}")
+
+# ================== Main Execution ==================
+X_data, y_data = load_and_preprocess_data()
+pcos_model, model_acc = train_model(X_data, y_data)
+st.sidebar.write(f"✅ **Model Accuracy:** {model_acc * 100:.2f}%")
+
+risk_score = personality_quiz()
+risk_percentage = risk_spin_wheel(risk_score)
+show_badges(risk_percentage)
+health_challenges()
