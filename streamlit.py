@@ -156,20 +156,19 @@ def community_forum():
     ]
     st.sidebar.write(f"🔹 {daily_topics[datetime.date.today().day % len(daily_topics)]}")
 
-    # New Post Form with unique session keys
-with st.form(key="new_post_form"):
-    user_name = st.text_input("Your Name (or leave blank for anonymous):", key="username_input")
-    user_message = st.text_area("Share your experience or ask a question:", key="message_input")
-    submit_button = st.form_submit_button("Post")
-    
-    if submit_button and user_message:
-        user_name = user_name if user_name else "Anonymous"
-        post_id = len(st.session_state.posts)
-        st.session_state.posts.append((post_id, user_name, user_message))
-        st.session_state.upvotes[post_id] = 0
-        st.session_state.reports[post_id] = 0
-        st.success("✅ Post shared successfully!")
-
+    # New Post Form
+    with st.form("new_post"):
+        user_name = st.text_input("Your Name (or leave blank for anonymous):")
+        user_message = st.text_area("Share your experience or ask a question:")
+        submit_button = st.form_submit_button("Post")
+        
+        if submit_button and user_message:
+            user_name = user_name if user_name else "Anonymous"
+            post_id = len(st.session_state.posts)
+            st.session_state.posts.append((post_id, user_name, user_message))
+            st.session_state.upvotes[post_id] = 0
+            st.session_state.reports[post_id] = 0
+            st.success("✅ Post shared successfully!")
 
     st.markdown("---")
 
