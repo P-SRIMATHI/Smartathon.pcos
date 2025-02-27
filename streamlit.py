@@ -50,15 +50,7 @@ except Exception as e:
     st.error(f"Error loading dataset: {e}")
     st.stop()
 
-# Fun facts and health tips
-fun_facts = [
-    "Did you know? PCOS affects 1 in 10 women of reproductive age!",
-    "Lifestyle changes, such as exercise and a balanced diet, can help manage PCOS symptoms.",
-    "PCOS is one of the leading causes of infertility in women.",
-    "Insulin resistance is a key factor in PCOS development.",
-    "Maintaining a healthy weight can reduce PCOS symptoms!"
-]
-
+# Health tips
 health_tips = [
     "🌱 Eat a balanced diet rich in whole foods and fiber!",
     "🏃‍♀️ Regular exercise can improve insulin sensitivity and overall health.",
@@ -86,23 +78,19 @@ def pcos_prediction_game():
             prediction = model.predict(user_input)
             risk_level = random.randint(1, 100)
         
-        st.subheader("🔮 Prediction Result:")
-        if prediction[0] == 1:
-            st.error(f"⚠ High risk of PCOS. Your estimated risk level: {risk_level}%")
-            st.write(random.choice(fun_facts))
-        else:
+        if prediction[0] == 0:
             st.success(f"✅ Low risk of PCOS. Your estimated risk level: {risk_level}%")
             st.write("Great job! Keep maintaining a healthy lifestyle. 💪")
             st.write("Here are some additional health tips for you:")
             for tip in random.sample(health_tips, 3):
                 st.write(f"- {tip}")
-        
-        # Show a gauge chart for risk level
-        st.write("### 📊 Your Risk Level")
-        fig, ax = plt.subplots()
-        sns.barplot(x=["Low", "Medium", "High"], y=[30, 60, 90], color='lightgray')
-        ax.bar(["Low", "Medium", "High"], [30, 60, risk_level], color=['green', 'orange', 'red'])
-        st.pyplot(fig)
+            
+            # Show a gauge chart for risk level
+            st.write("### 📊 Your Risk Level")
+            fig, ax = plt.subplots()
+            sns.barplot(x=["Low", "Medium", "High"], y=[30, 60, 90], color='lightgray')
+            ax.bar(["Low", "Medium", "High"], [30, 60, risk_level], color=['green', 'orange', 'red'])
+            st.pyplot(fig)
     
     st.write("\nThank you for playing! 🌟")
 
