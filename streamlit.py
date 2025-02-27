@@ -6,9 +6,13 @@ import random
 import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.graph_objects as go
+import shap
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
+
+# Set Page Config at the Top
+st.set_page_config(page_title="PCOS Risk Dashboard", layout="wide")
 
 # Load and prepare dataset
 file_path = "PCOS_data.csv"
@@ -42,48 +46,83 @@ except Exception as e:
     st.error(f"Error loading dataset: {e}")
     st.stop()
 
+# Apply Custom CSS for Better UI
+st.markdown(
+    """
+    <style>
+    .main {background-color: #f5f7fa;}
+    h1 {color: #ff4b4b; text-align: center;}
+    .stButton>button {background-color: #ff4b4b; color: white; font-size: 18px; border-radius: 10px;}
+    .stSidebar {background-color: #f5f7fa;}
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 # Dashboard Layout
-st.set_page_config(layout="wide")
-st.title("PCOS Risk Assessment Dashboard")
+st.title("✨ PCOS Risk Assessment Dashboard ✨")
 
 with st.sidebar:
-    st.header("Navigation")
+    st.header("🔍 Navigation")
     page = st.radio("Go to", ["PCOS Awareness", "PCOS Prediction", "Lifestyle Quiz"])
     st.write(f"✅ Model Accuracy: {model_accuracy * 100:.2f}%")
 
 # PCOS Awareness Section
 def pcos_awareness():
-    st.header("🔍 Understanding PCOS")
-    st.subheader("What is PCOS?")
-    st.write("PCOS (Polycystic Ovary Syndrome) is a common hormonal disorder affecting people with ovaries.")
+    st.header("📖 Understanding PCOS")
+    st.image("pcos_awareness.jpg", use_container_width=True)
     
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.subheader("Symptoms")
+        st.subheader("⚠️ Symptoms")
         symptoms = ["Irregular periods", "Excess hair growth", "Acne or oily skin", "Weight gain", "Thinning hair"]
         st.write("\n".join([f"- {symptom}" for symptom in symptoms]))
     with col2:
-        st.subheader("Causes")
+        st.subheader("🔬 Causes")
         causes = ["Hormonal imbalances", "Genetic factors", "Insulin resistance", "Inflammation"]
         st.write("\n".join([f"- {cause}" for cause in causes]))
     with col3:
-        st.subheader("Risks")
+        st.subheader("💔 Risks")
         risks = ["Infertility", "Type 2 diabetes", "High blood pressure", "Heart disease", "Depression"]
         st.write("\n".join([f"- {risk}" for risk in risks]))
+
+    # Graphs and Data Visualization
+    st.header("2. Data Visualizations 📊")
+    st.subheader("PCOS Prevalence in Different Studies")
+
+    # Data from different studies
+    study_labels = ["Tamil Nadu (18%)", "Mumbai (22.5%)", "Lucknow (3.7%)", "NIH Criteria (7.2%)", "Rotterdam Criteria (19.6%)"]
+    study_values = [18, 22.5, 3.7, 7.2, 19.6]
+
+    fig, ax = plt.subplots()
+    sns.barplot(x=study_labels, y=study_values, ax=ax)
+    ax.set_ylabel("Prevalence (%)")
+    ax.set_xlabel("Study Locations & Criteria")
+    ax.set_title("PCOS Prevalence in Different Studies")
+    plt.xticks(rotation=30, ha='right')
+    st.pyplot(fig)
+
+    st.subheader("SHAP Model Impact")
+    explainer = shap.TreeExplainer(model)
+    shap_values = explainer.shap_values(X_test)
+    fig, ax = plt.subplots()
+    shap.summary_plot(shap_values, X_test, feature_names=X_test.columns, show=False)
+    st.pyplot(fig)
 
 # PCOS Prediction Section
 def pcos_prediction():
     st.header("🧪 PCOS Prediction")
-    user_input = []
+    st.write("Enter your details below to predict your PCOS risk level.")
     
+    user_input = []
     col1, col2 = st.columns(2)
     for idx, feature in enumerate(X_filled.columns):
         with col1 if idx % 2 == 0 else col2:
-            value = st.number_input(f"Enter your {feature}", min_value=0.0, format="%.2f")
+            value = st.number_input(f"Enter {feature}", min_value=0.0, format="%.2f")
             user_input.append(value)
     
-    if st.button("Predict PCOS Risk!"):
-        with st.spinner("Analyzing data..."):
+    if st.button("🚀 Predict PCOS Risk!"):
+        with st.spinner("Analyzing data...⏳"):
             time.sleep(2)
             user_input = np.array(user_input).reshape(1, -1)
             prediction = model.predict(user_input)
@@ -94,53 +133,6 @@ def pcos_prediction():
             st.success("✅ Low risk of PCOS")
         else:
             st.warning("⚠️ High risk of PCOS")
-# Graphs and Data Visualization
-st.header("2. Data Visualizations 📊")
-st.subheader("PCOS Prevalence in Different Studies")
-
-# Data from different studies
-study_labels = ["Tamil Nadu (18%)", "Mumbai (22.5%)", "Lucknow (3.7%)", "NIH Criteria (7.2%)", "Rotterdam Criteria (19.6%)"]
-study_values = [18, 22.5, 3.7, 7.2, 19.6]
-
-fig, ax = plt.subplots()
-sns.barplot(x=study_labels, y=study_values, ax=ax)
-ax.set_ylabel("Prevalence (%)")
-ax.set_xlabel("Study Locations & Criteria")
-ax.set_title("PCOS Prevalence in Different Studies")
-plt.xticks(rotation=30, ha='right')
-st.pyplot(fig)
-
-st.subheader("SHAP Model Impact")
-explainer = shap.TreeExplainer(model)
-shap_values = explainer.shap_values(X_test)
-fig, ax = plt.subplots()
-shap.summary_plot(shap_values, X_test, feature_names=selected_features, show=False)
-st.pyplot(fig)
-
-# PCOS Lifestyle Quiz Section
-def lifestyle_quiz():
-    st.header("🩺 PCOS Lifestyle Risk Assessment")
-    
-    questions = {
-        "How often do you exercise?": {"Daily": 0, "3-5 times a week": 10, "1-2 times a week": 20, "Rarely": 30},
-        "How would you rate your diet?": {"Excellent": 0, "Good": 10, "Average": 20, "Poor": 30},
-        "Do you have irregular periods?": {"Never": 0, "Occasionally": 10, "Often": 20, "Always": 30},
-        "How stressed are you daily?": {"Not at all": 0, "Mildly": 10, "Moderately": 20, "Highly stressed": 30},
-        "How many hours do you sleep?": {"More than 8": 0, "7-8 hours": 10, "5-6 hours": 20, "Less than 5": 30}
-    }
-    
-    score = 0
-    for question, options in questions.items():
-        answer = st.radio(question, list(options.keys()), index=0)
-        score += options[answer]
-    
-    st.subheader(f"📊 Your Risk Score: **{score}**")
-    if score < 40:
-        st.success("✅ Low risk! Keep up the healthy habits!")
-    elif score < 70:
-        st.warning("⚠️ Moderate risk! Consider improving lifestyle choices.")
-    else:
-        st.error("🚨 High risk! Seek medical advice.")
 
 if page == "PCOS Awareness":
     pcos_awareness()
