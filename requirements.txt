@@ -12,5 +12,3 @@ scikit-learn
 imblearn
 fpdf
 pillow
-streamlit>=1.10.0
-plotly>=5.0.0
