@@ -57,7 +57,7 @@ st.sidebar.markdown("---")
 with st.expander("📌 **What is PCOS? (Click to Expand)**", expanded=True):
     st.markdown("""
         ### 🏥 **Understanding PCOS (Polycystic Ovary Syndrome)**
-        - **PCOS** is a common hormonal disorder affecting women of reproductive age.
+        -PCOS is a common hormonal disorder affecting women of reproductive age.
         - It can cause irregular periods, excessive hair growth, acne, and fertility issues.
         -PCOS affects 1 in 10 women of reproductive age Lifestyle changes, such as exercise and a balanced diet, help manage PCOS symptoms.
         -PCOS is one of the leading causes of infertility in women,Insulin resistance plays a key role in PCOS development.
