@@ -65,14 +65,14 @@ with st.expander("📌 **What is PCOS? (Click to Expand)**", expanded=True):
 ]
 
         
-        ### ⚠ **Symptoms of PCOS**
+        ### ⚠ Symptoms of PCOS
         - Irregular or absent menstrual cycles
         - Unwanted facial & body hair (hirsutism)
         - Thinning hair or hair loss
         - Weight gain & difficulty losing weight
         - Acne, oily skin, and dark patches
 
-        ### 🔍 **Common Causes of PCOS**
+        ### 🔍 Common Causes of PCOS
         - **Hormonal Imbalance** (High levels of insulin & androgens)
         - **Genetics** (Runs in families)
         - **Insulin Resistance** (Leads to weight gain & metabolic issues)
