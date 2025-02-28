@@ -76,27 +76,44 @@ with st.expander("📌 **What is PCOS? (Click to Expand)**", expanded=True):
 
 st.markdown("---")  # Divider for clean UI
 
-# 🎯 **PCOS Prediction Game**
-st.subheader("🎯 PCOS Prediction Game")
-user_input = []
-progress_bar = st.progress(0)
-for idx, feature in enumerate(X_filled.columns[:5]):  # Show first 5 inputs for better UX
-    value = st.number_input(f"Enter your {feature}", min_value=0.0, format="%.2f")
-    user_input.append(value)
-    progress_bar.progress((idx + 1) / len(X_filled.columns))
+# Streamlit UI for PCOS Prediction
+def pcos_prediction_game():
+    st.title("🎮 PCOS Prediction Game")
+    st.write("Answer the following questions and unlock insights! 🎯")
+    
+    user_input = []
+    progress_bar = st.progress(0)
+    for idx, feature in enumerate(X_filled.columns):
+        value = st.number_input(f"Enter your {feature}", min_value=0.0, format="%.2f")
+        user_input.append(value)
+        progress_bar.progress((idx + 1) / len(X_filled.columns))
+    
+    if st.button("🎲 Predict PCOS Risk!"):
+        with st.spinner("Analyzing your data...🔍"):
+            time.sleep(2)  # Simulate processing time
+            user_input = np.array(user_input).reshape(1, -1)
+            prediction = model.predict(user_input)
+            risk_level = random.randint(1, 100)
+        
+        st.subheader("🔮 Prediction Result:")
+        if prediction[0] == 1:
+            st.error(f"⚠ High risk of PCOS. Your estimated risk level: {risk_level}%")
+            st.write(random.choice(fun_facts))
+        else:
+            st.success(f"✅ Low risk of PCOS. Your estimated risk level: {risk_level}%")
+            st.write("Great job! Keep maintaining a healthy lifestyle. 💪")
+        
+        # Show a gauge chart for risk level
+        st.write("### 📊 Your Risk Level")
+        fig, ax = plt.subplots()
+        sns.barplot(x=["Low", "Medium", "High"], y=[30, 60, 90], color='lightgray')
+        ax.bar(["Low", "Medium", "High"], [30, 60, risk_level], color=['green', 'orange', 'red'])
+        st.pyplot(fig)
+    
+    st.write("\nThank you for playing! 🌟")
 
-if st.button("🔍 Predict PCOS Risk!"):
-    with st.spinner("Analyzing your data...🔍"):
-        time.sleep(2)
-        user_input = np.array(user_input).reshape(1, -1)
-        prediction = model.predict(user_input)
-        risk_level = random.randint(1, 100)
-
-    st.subheader("🔮 Prediction Result:")
-    if prediction[0] == 1:
-        st.error(f"⚠ High risk of PCOS. Your estimated risk level: {risk_level}%")
-    else:
-        st.success(f"✅ Low risk of PCOS. Your estimated risk level: {risk_level}%")
+# Run the game in Streamlit
+pcos_prediction_game()
 
 # 📊 **Health Gamification**
 st.subheader("🎮 Health Gamification")
