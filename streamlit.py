@@ -59,6 +59,11 @@ with st.expander("📌 **What is PCOS? (Click to Expand)**", expanded=True):
         ### 🏥 **Understanding PCOS (Polycystic Ovary Syndrome)**
         - **PCOS** is a common hormonal disorder affecting women of reproductive age.
         - It can cause irregular periods, excessive hair growth, acne, and fertility issues.
+        -PCOS affects 1 in 10 women of reproductive age Lifestyle changes, such as exercise and a balanced diet, help manage PCOS symptoms.
+        -PCOS is one of the leading causes of infertility in women,Insulin resistance plays a key role in PCOS development.
+        -Maintaining a healthy weight can reduce PCOS symptoms!
+]
+
         
         ### ⚠ **Symptoms of PCOS**
         - Irregular or absent menstrual cycles
@@ -79,10 +84,7 @@ st.markdown("---")  # Divider for clean UI
 # Streamlit UI for PCOS Prediction
  # PCOS Prediction Game
 st.sidebar.title("PCOS Dashboard")
-st.title("🎮 PCOS Prediction Game & Fun Facts")
-fun_facts = [
-    "PCOS affects 1 in 10 women of reproductive age Lifestyle changes, such as exercise and a balanced diet, help manage PCOS symptoms.PCOS is one of the leading causes of infertility in women,Insulin resistance plays a key role in PCOS development.Maintaining a healthy weight can reduce PCOS symptoms!"
-]
+st.title("1.🎮 PCOS Prediction Game")
 
 user_input = []
 progress_bar = st.progress(0)
@@ -120,7 +122,7 @@ if st.button("🎲 Predict PCOS Risk!"):
     with open(report_path, "rb") as file:
         st.download_button("Download Report", file, file_name="PCOS_Report.pdf")
 
-# 📊 **Health Gamification**
+#2. 📊 **Health Gamification**
 st.subheader("🎮 Health Gamification")
 col1, col2 = st.columns(2)
 with col1:
@@ -132,7 +134,7 @@ if water_glasses >= 8: st.success("✅ Great job on water intake!")
 if steps >= 10000: st.success("🔥 Awesome! You've walked 10,000+ steps!")
 
 # 💬 **Community Support**
-st.subheader("💬 Community Support")
+st.subheader("3.💬 Community Support")
 new_post = st.text_area("Share your experience or ask a question:")
 if st.button("Submit Post") and new_post:
     st.session_state.setdefault("posts", []).append(new_post)
@@ -143,7 +145,7 @@ if "posts" in st.session_state and st.session_state["posts"]:
         st.write(f"- {post}")
 
 # 🧠 **PCOS Quiz**
-st.subheader("🧠 PCOS Trivia Quiz")
+st.subheader("4.🧠 PCOS Trivia Quiz")
 questions = {
     "Common PCOS symptom?": ["Irregular periods", "Acne", "Hair loss"],
     "Hormone imbalance in PCOS?": ["Insulin", "Estrogen", "Progesterone"],
@@ -153,12 +155,12 @@ quiz_score = sum(1 for q, opts in questions.items() if st.radio(q, opts) == opts
 st.write(f"🎯 **Final quiz score: {quiz_score}/{len(questions)}**")
 
 # 😊 **Mood Tracker**
-st.subheader("😊 Mood Tracker")
+st.subheader("5.😊 Mood Tracker")
 mood = st.selectbox("How do you feel today?", ["Happy", "Excited", "Neutral", "Sad", "Anxious"])
 st.write(f"💬 You are feeling: **{mood}**")
 
 # 🍲 **PCOS-Friendly Recipes**
-st.subheader("🍲 PCOS-Friendly Recipes")
+st.subheader("6.🍲 PCOS-Friendly Recipes")
 recipes = [
     {"name": "Spinach & Chickpea Curry", "ingredients": ["Spinach", "Chickpeas", "Coconut milk"]},
     {"name": "Oats Pancakes", "ingredients": ["Oats", "Eggs", "Banana"]},
@@ -169,5 +171,5 @@ for recipe in recipes:
     st.write("🥗 Ingredients:", ", ".join(recipe["ingredients"]))
 
 # 🩺 **3D Model of PCOS**
-st.subheader("🩺 Explore PCOS in 3D")
+st.subheader("7.🩺 Explore PCOS in 3D")
 st.components.v1.iframe("https://sketchfab.com/models/62bfb490ad344caaaea675da9df7ba34/embed", height=500)
