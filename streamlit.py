@@ -14,7 +14,7 @@ from fpdf import FPDF
 st.sidebar.title("📊 Model Performance")
 st.sidebar.markdown("---")
 
-# ✅ Load and Prepare Dataset
+# ✅ **Load and Prepare Dataset**
 file_path = "PCOS_data.csv"
 
 def load_data():
@@ -33,7 +33,7 @@ if "PCOS (Y/N)" not in df_cleaned.columns:
     st.error("Target column 'PCOS (Y/N)' not found in the dataset.")
     st.stop()
 
-# 🎯 Train Model
+# 🎯 **Train Model**
 X = df_cleaned.drop(columns=["PCOS (Y/N)"])
 y = df_cleaned["PCOS (Y/N)"]
 X_filled = X.fillna(X.median())
@@ -42,12 +42,12 @@ model = RandomForestClassifier(n_estimators=100, random_state=42)
 model.fit(X_train, y_train)
 y_pred = model.predict(X_test)
 
-# 🎯 Calculate Model Metrics
+# 🎯 **Calculate Model Metrics**
 model_accuracy = accuracy_score(y_test, y_pred)
 precision = precision_score(y_test, y_pred, average="binary")
 f1 = f1_score(y_test, y_pred, average="binary")
 
-# 📊 Display Model Metrics in Sidebar
+# 📊 **Display Model Metrics in Sidebar**
 st.sidebar.write(f"✅ **Accuracy:** {model_accuracy * 100:.2f}%")
 st.sidebar.write(f"🎯 **Precision:** {precision:.2f}")
 st.sidebar.write(f"📌 **F1 Score:** {f1:.2f}")
@@ -76,23 +76,6 @@ with st.expander("📌 **What is PCOS? (Click to Expand)**", expanded=True):
 
 st.markdown("---")  # Divider for clean UI
 
-# 📊 **Data Visualization: PCOS Prevalence**
-st.header("📊 PCOS Prevalence in Different Studies")
-
-# Data from different studies
-study_labels = ["Tamil Nadu (18%)", "Mumbai (22.5%)", "Lucknow (3.7%)", "NIH Criteria (7.2%)", "Rotterdam Criteria (19.6%)"]
-study_values = [18, 22.5, 3.7, 7.2, 19.6]
-
-fig, ax = plt.subplots()
-sns.barplot(x=study_labels, y=study_values, ax=ax)
-ax.set_ylabel("Prevalence (%)")
-ax.set_xlabel("Study Locations & Criteria")
-ax.set_title("PCOS Prevalence in Different Studies")
-plt.xticks(rotation=30, ha='right')
-st.pyplot(fig)
-
-st.markdown("---")  # Divider for clean UI
-
 # 🎯 **PCOS Prediction Game**
 st.subheader("🎯 PCOS Prediction Game")
 user_input = []
@@ -115,9 +98,7 @@ if st.button("🔍 Predict PCOS Risk!"):
     else:
         st.success(f"✅ Low risk of PCOS. Your estimated risk level: {risk_level}%")
 
-st.markdown("---")  # Divider for clean UI
-
-# 🎮 **Health Gamification**
+# 📊 **Health Gamification**
 st.subheader("🎮 Health Gamification")
 col1, col2 = st.columns(2)
 with col1:
@@ -127,8 +108,6 @@ with col2:
 st.write(f"🏆 **Total Health Points:** {water_glasses * 2 + steps // 500}")
 if water_glasses >= 8: st.success("✅ Great job on water intake!")
 if steps >= 10000: st.success("🔥 Awesome! You've walked 10,000+ steps!")
-
-st.markdown("---")  # Divider for clean UI
 
 # 💬 **Community Support**
 st.subheader("💬 Community Support")
@@ -141,8 +120,6 @@ if "posts" in st.session_state and st.session_state["posts"]:
     for post in st.session_state["posts"]:
         st.write(f"- {post}")
 
-st.markdown("---")  # Divider for clean UI
-
 # 🧠 **PCOS Quiz**
 st.subheader("🧠 PCOS Trivia Quiz")
 questions = {
@@ -153,8 +130,22 @@ questions = {
 quiz_score = sum(1 for q, opts in questions.items() if st.radio(q, opts) == opts[0])
 st.write(f"🎯 **Final quiz score: {quiz_score}/{len(questions)}**")
 
-st.markdown("---")  # Divider for clean UI
+# 😊 **Mood Tracker**
+st.subheader("😊 Mood Tracker")
+mood = st.selectbox("How do you feel today?", ["Happy", "Excited", "Neutral", "Sad", "Anxious"])
+st.write(f"💬 You are feeling: **{mood}**")
 
-# 🩺 **Explore PCOS in 3D**
+# 🍲 **PCOS-Friendly Recipes**
+st.subheader("🍲 PCOS-Friendly Recipes")
+recipes = [
+    {"name": "Spinach & Chickpea Curry", "ingredients": ["Spinach", "Chickpeas", "Coconut milk"]},
+    {"name": "Oats Pancakes", "ingredients": ["Oats", "Eggs", "Banana"]},
+    {"name": "Greek Yogurt Salad", "ingredients": ["Greek Yogurt", "Cucumber", "Olives"]}
+]
+for recipe in recipes:
+    st.subheader(recipe["name"])
+    st.write("🥗 Ingredients:", ", ".join(recipe["ingredients"]))
+
+# 🩺 **3D Model of PCOS**
 st.subheader("🩺 Explore PCOS in 3D")
 st.components.v1.iframe("https://sketchfab.com/models/62bfb490ad344caaaea675da9df7ba34/embed", height=500)
