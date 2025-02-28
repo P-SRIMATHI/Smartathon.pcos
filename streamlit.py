@@ -62,8 +62,6 @@ with st.expander("📌 **What is PCOS? (Click to Expand)**", expanded=True):
         -PCOS affects 1 in 10 women of reproductive age Lifestyle changes, such as exercise and a balanced diet, help manage PCOS symptoms.
         -PCOS is one of the leading causes of infertility in women,Insulin resistance plays a key role in PCOS development.
         -Maintaining a healthy weight can reduce PCOS symptoms!
-]
-
         
         ### ⚠ Symptoms of PCOS
         - Irregular or absent menstrual cycles
