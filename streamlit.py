@@ -79,6 +79,22 @@ with st.expander("📌 **What is PCOS? (Click to Expand)**", expanded=True):
 
 st.markdown("---")  # Divider for clean UI
 
+# Graphs and Data Visualization
+st.header("2. Data Visualizations 📊")
+st.subheader("PCOS Prevalence in Different Studies")
+
+# Data from different studies
+study_labels = ["Tamil Nadu (18%)", "Mumbai (22.5%)", "Lucknow (3.7%)", "NIH Criteria (7.2%)", "Rotterdam Criteria (19.6%)"]
+study_values = [18, 22.5, 3.7, 7.2, 19.6]
+
+fig, ax = plt.subplots()
+sns.barplot(x=study_labels, y=study_values, ax=ax)
+ax.set_ylabel("Prevalence (%)")
+ax.set_xlabel("Study Locations & Criteria")
+ax.set_title("PCOS Prevalence in Different Studies")
+plt.xticks(rotation=30, ha='right')
+st.pyplot(fig)
+
 # Streamlit UI for PCOS Prediction
  # PCOS Prediction Game
 st.title("1.🎮 PCOS Prediction Game")
