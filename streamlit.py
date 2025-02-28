@@ -10,11 +10,11 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_score, f1_score
 from fpdf import FPDF
 
-# 🎯 Sidebar for Model Metrics
-st.sidebar.title("📊 Model Performance")
+# Sidebar for Model Metrics
+st.sidebar.title("\ud83d\udcca Model Performance")
 st.sidebar.markdown("---")
 
-# ✅ **Load and Prepare Dataset**
+# Load and Prepare Dataset
 file_path = "PCOS_data.csv"
 
 def load_data():
@@ -33,7 +33,7 @@ if "PCOS (Y/N)" not in df_cleaned.columns:
     st.error("Target column 'PCOS (Y/N)' not found in the dataset.")
     st.stop()
 
-# 🎯 **Train Model**
+# Train Model
 X = df_cleaned.drop(columns=["PCOS (Y/N)"])
 y = df_cleaned["PCOS (Y/N)"]
 X_filled = X.fillna(X.median())
@@ -42,46 +42,35 @@ model = RandomForestClassifier(n_estimators=100, random_state=42)
 model.fit(X_train, y_train)
 y_pred = model.predict(X_test)
 
-# 🎯 **Calculate Model Metrics**
+# Calculate Model Metrics
 model_accuracy = accuracy_score(y_test, y_pred)
 precision = precision_score(y_test, y_pred, average="binary")
 f1 = f1_score(y_test, y_pred, average="binary")
 
-# 📊 **Display Model Metrics in Sidebar**
-st.sidebar.write(f"✅ **Accuracy:** {model_accuracy * 100:.2f}%")
-st.sidebar.write(f"🎯 **Precision:** {precision:.2f}")
-st.sidebar.write(f"📌 **F1 Score:** {f1:.2f}")
+# Display Model Metrics in Sidebar
+st.sidebar.write(f"\u2705 **Accuracy:** {model_accuracy * 100:.2f}%")
+st.sidebar.write(f"\ud83c\udfaf **Precision:** {precision:.2f}")
+st.sidebar.write(f"\ud83d\udccc **F1 Score:** {f1:.2f}")
 st.sidebar.markdown("---")
 
-# 🩺 **PCOS Introduction Section**
-with st.expander("📌 **What is PCOS? (Click to Expand)**", expanded=True):
-    st.markdown("""
-        ### 🏥 Understanding PCOS (Polycystic Ovary Syndrome)
-        -PCOS is a common hormonal disorder affecting women of reproductive age.
-        -It can cause irregular periods, excessive hair growth, acne, and fertility issues.
-        -PCOS affects 1 in 10 women of reproductive age Lifestyle changes, such as exercise and a balanced diet, help manage PCOS symptoms.
-        -PCOS is one of the leading causes of infertility in women,Insulin resistance plays a key role in PCOS development.
-        -Maintaining a healthy weight can reduce PCOS symptoms!
-        
-        ### ⚠ Symptoms of PCOS
-        - Irregular or absent menstrual cycles
-        - Unwanted facial & body hair (hirsutism)
-        - Thinning hair or hair loss
-        - Weight gain & difficulty losing weight
-        - Acne, oily skin, and dark patches
+# Graphs and Data Visualization
+st.header("2. Data Visualizations \ud83d\udcca")
+st.subheader("PCOS Prevalence in Different Studies")
 
-        ### 🔍 Common Causes of PCOS
-        - **Hormonal Imbalance** (High levels of insulin & androgens)
-        - **Genetics** (Runs in families)
-        - **Insulin Resistance** (Leads to weight gain & metabolic issues)
-        - **Inflammation** (Chronic low-grade inflammation)
-    """)
+# Data from different studies
+study_labels = ["Tamil Nadu (18%)", "Mumbai (22.5%)", "Lucknow (3.7%)", "NIH Criteria (7.2%)", "Rotterdam Criteria (19.6%)"]
+study_values = [18, 22.5, 3.7, 7.2, 19.6]
 
-st.markdown("---")  # Divider for clean UI
+fig, ax = plt.subplots()
+sns.barplot(x=study_labels, y=study_values, ax=ax)
+ax.set_ylabel("Prevalence (%)")
+ax.set_xlabel("Study Locations & Criteria")
+ax.set_title("PCOS Prevalence in Different Studies")
+plt.xticks(rotation=30, ha='right')
+st.pyplot(fig)
 
-# Streamlit UI for PCOS Prediction
- # PCOS Prediction Game
-st.title("1.🎮 PCOS Prediction Game")
+# PCOS Prediction Game
+st.title("1.\ud83c\udfae PCOS Prediction Game")
 
 user_input = []
 progress_bar = st.progress(0)
@@ -90,17 +79,16 @@ for idx, feature in enumerate(X_filled.columns):
     user_input.append(value)
     progress_bar.progress((idx + 1) / len(X_filled.columns))
 
-if st.button("🎲 Predict PCOS Risk!"):
-    with st.spinner("Analyzing your data...🔍"):
+if st.button("\ud83c\udfb2 Predict PCOS Risk!"):
+    with st.spinner("Analyzing your data...\ud83d\udd0d"):
         time.sleep(2)
         user_input = np.array(user_input).reshape(1, -1)
         prediction = model.predict(user_input)
         risk_level = random.randint(1, 100)
     
-    st.subheader("🔮 Prediction Result:")
+    st.subheader("\ud83d\udd2e Prediction Result:")
     result_text = "High risk of PCOS" if prediction[0] == 1 else "Low risk of PCOS"
     st.write(f"{result_text}. Estimated risk level: {risk_level}%")
-    st.write(random.choice(fun_facts))
     
     def generate_report():
         pdf = FPDF()
@@ -118,55 +106,3 @@ if st.button("🎲 Predict PCOS Risk!"):
     report_path = generate_report()
     with open(report_path, "rb") as file:
         st.download_button("Download Report", file, file_name="PCOS_Report.pdf")
-
-#2. 📊 **Health Gamification**
-st.subheader("🎮 Health Gamification")
-col1, col2 = st.columns(2)
-with col1:
-    water_glasses = st.slider("💧 Glasses of water today?", 0, 15)
-with col2:
-    steps = st.slider("🚶 Steps walked today?", 0, 20000)
-st.write(f"🏆 **Total Health Points:** {water_glasses * 2 + steps // 500}")
-if water_glasses >= 8: st.success("✅ Great job on water intake!")
-if steps >= 10000: st.success("🔥 Awesome! You've walked 10,000+ steps!")
-
-# 💬 **Community Support**
-st.subheader("3.💬 Community Support")
-new_post = st.text_area("Share your experience or ask a question:")
-if st.button("Submit Post") and new_post:
-    st.session_state.setdefault("posts", []).append(new_post)
-    st.success("✅ Post submitted!")
-if "posts" in st.session_state and st.session_state["posts"]:
-    st.write("### Community Posts:")
-    for post in st.session_state["posts"]:
-        st.write(f"- {post}")
-
-# 🧠 **PCOS Quiz**
-st.subheader("4.🧠 PCOS Trivia Quiz")
-questions = {
-    "Common PCOS symptom?": ["Irregular periods", "Acne", "Hair loss"],
-    "Hormone imbalance in PCOS?": ["Insulin", "Estrogen", "Progesterone"],
-    "Best lifestyle change for PCOS?": ["Exercise", "Skipping meals", "High sugar diet"]
-}
-quiz_score = sum(1 for q, opts in questions.items() if st.radio(q, opts) == opts[0])
-st.write(f"🎯 **Final quiz score: {quiz_score}/{len(questions)}**")
-
-# 😊 **Mood Tracker**
-st.subheader("5.😊 Mood Tracker")
-mood = st.selectbox("How do you feel today?", ["Happy", "Excited", "Neutral", "Sad", "Anxious"])
-st.write(f"💬 You are feeling: **{mood}**")
-
-# 🍲 **PCOS-Friendly Recipes**
-st.subheader("6.🍲 PCOS-Friendly Recipes")
-recipes = [
-    {"name": "Spinach & Chickpea Curry", "ingredients": ["Spinach", "Chickpeas", "Coconut milk"]},
-    {"name": "Oats Pancakes", "ingredients": ["Oats", "Eggs", "Banana"]},
-    {"name": "Greek Yogurt Salad", "ingredients": ["Greek Yogurt", "Cucumber", "Olives"]}
-]
-for recipe in recipes:
-    st.subheader(recipe["name"])
-    st.write("🥗 Ingredients:", ", ".join(recipe["ingredients"]))
-
-# 🩺 **3D Model of PCOS**
-st.subheader("7.🩺 Explore PCOS in 3D")
-st.components.v1.iframe("https://sketchfab.com/models/62bfb490ad344caaaea675da9df7ba34/embed", height=500)
