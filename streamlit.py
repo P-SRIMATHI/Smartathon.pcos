@@ -80,8 +80,7 @@ st.markdown("---")  # Divider for clean UI
  # PCOS Prediction Game
 st.sidebar.title("PCOS Dashboard")
 st.title("🎮 PCOS Prediction Game & Fun Facts")
-fun_facts = [
-    "PCOS affects 1 in 10 women of reproductive age Lifestyle changes, such as exercise and a balanced diet, help manage PCOS symptoms.
+fun_facts = ["PCOS affects 1 in 10 women of reproductive age Lifestyle changes, such as exercise and a balanced diet, help manage PCOS symptoms.
     PCOS is one of the leading causes of infertility in women,
     Insulin resistance plays a key role in PCOS development.
     Maintaining a healthy weight can reduce PCOS symptoms!"
