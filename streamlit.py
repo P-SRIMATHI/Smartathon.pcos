@@ -96,15 +96,30 @@ plt.xticks(rotation=30, ha='right')
 st.pyplot(fig)
 
 # Streamlit UI for PCOS Prediction
- # PCOS Prediction Game
-st.title("1.🎮 PCOS Prediction Game")
-
+# 🎮 **PCOS Prediction Game**
+st.title("🎮 PCOS Prediction Game")
 user_input = []
 progress_bar = st.progress(0)
 for idx, feature in enumerate(X_filled.columns):
     value = st.number_input(f"Enter your {feature}", min_value=0.0, format="%.2f")
     user_input.append(value)
     progress_bar.progress((idx + 1) / len(X_filled.columns))
+
+def generate_report(result_text, risk_level):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+    pdf.cell(200, 10, "PCOS Prediction Report", ln=True, align='C')
+    pdf.ln(10)
+    pdf.multi_cell(0, 10, f"Prediction: {result_text}\nEstimated Risk Level: {risk_level}%")
+    pdf.ln(10)
+    pdf.set_font("Arial", style='B', size=12)
+    pdf.cell(0, 10, "Recommended Lifestyle Changes:", ln=True)
+    pdf.set_font("Arial", size=12)
+    pdf.multi_cell(0, 10, "- Maintain a balanced diet\n- Exercise regularly\n- Manage stress\n- Get enough sleep")
+    report_path = "PCOS_Report.pdf"
+    pdf.output(report_path)
+    return report_path
 
 if st.button("🎲 Predict PCOS Risk!"):
     with st.spinner("Analyzing your data...🔍"):
@@ -116,24 +131,12 @@ if st.button("🎲 Predict PCOS Risk!"):
     st.subheader("🔮 Prediction Result:")
     result_text = "High risk of PCOS" if prediction[0] == 1 else "Low risk of PCOS"
     st.write(f"{result_text}. Estimated risk level: {risk_level}%")
-    st.write(random.choice(fun_facts))
     
-    def generate_report():
-        pdf = FPDF()
-        pdf.add_page()
-        pdf.set_font("Arial", size=12)
-        pdf.cell(200, 10, "PCOS Prediction Report", ln=True, align='C')
-        pdf.ln(10)
-        pdf.multi_cell(0, 10, f"Prediction: {result_text}\nRisk Level: {risk_level}%")
-        pdf.ln(10)
-        pdf.multi_cell(0, 10, "Recommended Lifestyle Changes:\n- Maintain a balanced diet\n- Exercise regularly\n- Manage stress\n- Get enough sleep")
-        report_path = "PCOS_Report.pdf"
-        pdf.output(report_path)
-        return report_path
-    
-    report_path = generate_report()
+    report_path = generate_report(result_text, risk_level)
     with open(report_path, "rb") as file:
-        st.download_button("Download Report", file, file_name="PCOS_Report.pdf")
+        st.download_button("📄 Download Your PCOS Report", file, file_name="PCOS_Report.pdf")
+
+ 
 
 #2. 📊 **Health Gamification**
 st.subheader("🎮 Health Gamification")
