@@ -7,37 +7,12 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, precision_score, f1_score
 from fpdf import FPDF
 
-# 🎯 Sidebar for Model Accuracy
-st.sidebar.title("PCOS Health Dashboard")
-st.sidebar.write("📊 **AI Model Accuracy**")
-st.sidebar.write("🔍 Predicting PCOS Risk")
+# 🎯 Sidebar for Model Metrics
+st.sidebar.title("📊 Model Performance")
 st.sidebar.markdown("---")
-
-# 🩺 **PCOS Introduction Section (Now in an Expander)**
-with st.expander("📌 **What is PCOS? (Click to Expand)**", expanded=True):
-    st.markdown("""
-        ### 🏥 **Understanding PCOS (Polycystic Ovary Syndrome)**
-        - **PCOS** is a common hormonal disorder affecting women of reproductive age.
-        - It can cause irregular periods, excessive hair growth, acne, and fertility issues.
-        
-        ### ⚠ **Symptoms of PCOS**
-        - Irregular or absent menstrual cycles
-        - Unwanted facial & body hair (hirsutism)
-        - Thinning hair or hair loss
-        - Weight gain & difficulty losing weight
-        - Acne, oily skin, and dark patches
-
-        ### 🔍 **Common Causes of PCOS**
-        - **Hormonal Imbalance** (High levels of insulin & androgens)
-        - **Genetics** (Runs in families)
-        - **Insulin Resistance** (Leads to weight gain & metabolic issues)
-        - **Inflammation** (Chronic low-grade inflammation)
-    """)
-
-st.markdown("---")  # Divider for a clean UI
 
 # ✅ **Load and Prepare Dataset**
 file_path = "PCOS_data.csv"
@@ -58,6 +33,7 @@ if "PCOS (Y/N)" not in df_cleaned.columns:
     st.error("Target column 'PCOS (Y/N)' not found in the dataset.")
     st.stop()
 
+# 🎯 **Train Model**
 X = df_cleaned.drop(columns=["PCOS (Y/N)"])
 y = df_cleaned["PCOS (Y/N)"]
 X_filled = X.fillna(X.median())
@@ -65,19 +41,42 @@ X_train, X_test, y_train, y_test = train_test_split(X_filled, y, test_size=0.2, 
 model = RandomForestClassifier(n_estimators=100, random_state=42)
 model.fit(X_train, y_train)
 y_pred = model.predict(X_test)
+
+# 🎯 **Calculate Model Metrics**
 model_accuracy = accuracy_score(y_test, y_pred)
+precision = precision_score(y_test, y_pred, average="binary")
+f1 = f1_score(y_test, y_pred, average="binary")
 
-# 🎯 **Fun Facts & PCOS Prediction**
-st.subheader("💡 PCOS Fun Facts & Prediction Game")
-fun_facts = [
-    "PCOS affects 1 in 10 women of reproductive age!",
-    "Lifestyle changes can help manage PCOS symptoms.",
-    "PCOS is a leading cause of infertility in women.",
-    "Insulin resistance is a key factor in PCOS development.",
-    "Maintaining a healthy weight can reduce PCOS symptoms!"
-]
-st.info(random.choice(fun_facts))  # Display a random fun fact in an info box
+# 📊 **Display Model Metrics in Sidebar**
+st.sidebar.write(f"✅ **Accuracy:** {model_accuracy * 100:.2f}%")
+st.sidebar.write(f"🎯 **Precision:** {precision:.2f}")
+st.sidebar.write(f"📌 **F1 Score:** {f1:.2f}")
+st.sidebar.markdown("---")
 
+# 🩺 **PCOS Introduction Section**
+with st.expander("📌 **What is PCOS? (Click to Expand)**", expanded=True):
+    st.markdown("""
+        ### 🏥 **Understanding PCOS (Polycystic Ovary Syndrome)**
+        - **PCOS** is a common hormonal disorder affecting women of reproductive age.
+        - It can cause irregular periods, excessive hair growth, acne, and fertility issues.
+        
+        ### ⚠ **Symptoms of PCOS**
+        - Irregular or absent menstrual cycles
+        - Unwanted facial & body hair (hirsutism)
+        - Thinning hair or hair loss
+        - Weight gain & difficulty losing weight
+        - Acne, oily skin, and dark patches
+
+        ### 🔍 **Common Causes of PCOS**
+        - **Hormonal Imbalance** (High levels of insulin & androgens)
+        - **Genetics** (Runs in families)
+        - **Insulin Resistance** (Leads to weight gain & metabolic issues)
+        - **Inflammation** (Chronic low-grade inflammation)
+    """)
+
+st.markdown("---")  # Divider for clean UI
+
+# 🎯 **PCOS Prediction Game**
 st.subheader("🎯 PCOS Prediction Game")
 user_input = []
 progress_bar = st.progress(0)
