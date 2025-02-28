@@ -80,7 +80,7 @@ with st.expander("📌 **What is PCOS? (Click to Expand)**", expanded=True):
 st.markdown("---")  # Divider for clean UI
 
 # Graphs and Data Visualization
-st.header("2. Data Visualizations 📊")
+st.header("Data Visualizations 📊")
 st.subheader("PCOS Prevalence in Different Studies")
 
 # Data from different studies
